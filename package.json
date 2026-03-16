@@ -1,0 +1,25 @@
+{
+  "name": "ai_meal_planner",
+  "version": "1.0.0",
+  "description": "Bell Family AI Meal Planner",
+  "main": "server/index.js",
+  "scripts": {
+    "build": "cd client && npm run build",
+    "start": "node server/index.js",
+    "dev:server": "node --watch server/index.js",
+    "dev:client": "cd client && npm run dev",
+    "postinstall": "cd server && npm install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.0"
+  }
+}
