@@ -3,7 +3,7 @@ services:
     name: bell-meal-planner
     env: node
     region: oregon
-    buildCommand: npm run build
+    buildCommand: npm install && cd client && npm install && cd .. && npm run build
     startCommand: npm start
     envVars:
       - key: GEMINI_API_KEY
