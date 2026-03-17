@@ -170,6 +170,38 @@ export default function SettingsPage() {
         ))}
       </div>
 
+      {/* Notification Emails */}
+      <div className="card p-6 space-y-4">
+        <h3 className="font-semibold text-gray-800 text-lg">📧 Notification Emails</h3>
+        <p className="text-sm text-gray-500">When the meal plan is auto-generated, an email will be sent to everyone on this list.</p>
+        {(settings.notificationEmails || []).map((email, i) => (
+          <div key={i} className="flex gap-2 items-center">
+            <input
+              type="email"
+              value={email}
+              onChange={e => {
+                const updated = [...(settings.notificationEmails || [])];
+                updated[i] = e.target.value;
+                setSettings(s => ({ ...s, notificationEmails: updated }));
+              }}
+              className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+              placeholder="email@example.com"
+            />
+            <button
+              onClick={() => {
+                const updated = (settings.notificationEmails || []).filter((_, j) => j !== i);
+                setSettings(s => ({ ...s, notificationEmails: updated }));
+              }}
+              className="text-red-400 hover:text-red-600 px-2 text-lg"
+            >✕</button>
+          </div>
+        ))}
+        <button
+          onClick={() => setSettings(s => ({ ...s, notificationEmails: [...(s.notificationEmails || []), ''] }))}
+          className="btn-secondary text-sm"
+        >+ Add email</button>
+      </div>
+
       {/* Default portions */}
       <div className="card p-6 space-y-3">
         <h3 className="font-semibold text-gray-800 text-lg">🍽️ Default Portions</h3>
