@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_DIR = path.join(__dirname, '../../data');
+const SEED_DIR = path.join(DATA_DIR, 'seed');
 const PLAN_FILE = path.join(DATA_DIR, 'current-plan.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'plan-history.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
@@ -11,6 +12,22 @@ const MEALS_FILE = path.join(DATA_DIR, 'meals.json');
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
+
+// Copy seed data files to data dir if they don't exist yet (handles Render's ephemeral filesystem)
+function seedIfNeeded() {
+  ensureDataDir();
+  if (!fs.existsSync(SEED_DIR)) return;
+  const seedFiles = fs.readdirSync(SEED_DIR).filter(f => f.endsWith('.json'));
+  for (const file of seedFiles) {
+    const target = path.join(DATA_DIR, file);
+    if (!fs.existsSync(target)) {
+      fs.copyFileSync(path.join(SEED_DIR, file), target);
+      console.log(`Seeded ${file} from seed data`);
+    }
+  }
+}
+
+seedIfNeeded();
 
 function readJSON(filePath, defaultVal = null) {
   try {

@@ -1,0 +1,29 @@
+{
+  "familyMembers": [
+    "Mom",
+    "Dad",
+    "Maya",
+    "Maddy"
+  ],
+  "allergies": {
+    "Mom": [],
+    "Dad": [
+      "peanuts",
+      "fish",
+      "green peas"
+    ],
+    "Maya": [
+      "peanuts",
+      "sesame"
+    ],
+    "Maddy": [
+      "peanuts"
+    ]
+  },
+  "scheduleDay": "Saturday",
+  "scheduleHour": 12,
+  "scheduleMinute": 0,
+  "takeoutDay": "Thursday",
+  "defaultPortions": 4,
+  "notificationEmails": []
+}

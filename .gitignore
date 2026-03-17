@@ -3,4 +3,5 @@ node_modules/
 server/public/
 *.log
 data/*.json
+!data/seed/*.json
 !data/.gitkeep
