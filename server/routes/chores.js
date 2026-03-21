@@ -4,6 +4,7 @@ const {
   getChoreDefinitions,
   saveChoreDefinitions,
   getCurrentChorePlan,
+  getCurrentPlan,
   saveChorePlan,
   writeChorePlanDirect,
   getChoreHistory,
@@ -49,6 +50,28 @@ router.post('/plan/generate', async (req, res) => {
       recentAssignments,
       notes: choreData.notes || {},
     });
+
+    // Sync "Make supper" chore with meal plan cook assignments
+    const mealPlan = getCurrentPlan();
+    if (mealPlan?.days) {
+      for (const choreDay of plan.days) {
+        const mealDay = mealPlan.days.find(d => d.day === choreDay.day);
+        if (mealDay?.cook) {
+          for (const a of choreDay.assignments) {
+            if (a.choreId === 'make-supper' || a.choreName?.toLowerCase().includes('make supper')) {
+              a.assignedTo = mealDay.cook;
+            }
+          }
+        }
+      }
+    }
+
+    // Sort assignments by person name within each day
+    for (const choreDay of plan.days) {
+      if (choreDay.assignments) {
+        choreDay.assignments.sort((a, b) => a.assignedTo.localeCompare(b.assignedTo));
+      }
+    }
 
     saveChorePlan(plan);
     res.json(plan);

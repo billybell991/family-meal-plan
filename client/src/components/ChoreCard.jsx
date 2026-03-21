@@ -35,12 +35,13 @@ export default function ChoreCard({ dayData, onToggleComplete }) {
     ? 'border-l-4 border-indigo-500'
     : 'border-l-4 border-indigo-200';
 
-  // Group by person
+  // Group by person (sorted alphabetically)
   const byPerson = {};
   for (const a of assignments) {
     if (!byPerson[a.assignedTo]) byPerson[a.assignedTo] = [];
     byPerson[a.assignedTo].push(a);
   }
+  const sortedPersonEntries = Object.entries(byPerson).sort(([a], [b]) => a.localeCompare(b));
 
   return (
     <div className={`card ${accentBorder} flex flex-col`}>
@@ -90,7 +91,7 @@ export default function ChoreCard({ dayData, onToggleComplete }) {
 
       {expanded && (
         <div className="border-t border-slate-100 px-4 py-3 space-y-3">
-          {Object.entries(byPerson).map(([name, chores]) => (
+          {sortedPersonEntries.map(([name, chores]) => (
             <div key={name}>
               <p className={`text-xs font-semibold uppercase tracking-wide mb-1.5 ${MEMBER_COLORS[name]?.split(' ')[1] || 'text-slate-500'}`}>
                 {name}

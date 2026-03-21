@@ -176,7 +176,7 @@ export default function DashboardPage() {
                           <p className="text-sm text-slate-400 italic">No chores</p>
                         ) : (
                           <div className="space-y-1">
-                            {assignments.map((a, i) => (
+                            {[...assignments].sort((a, b) => a.assignedTo.localeCompare(b.assignedTo)).map((a, i) => (
                               <label
                                 key={`${a.choreId}-${i}`}
                                 className={`flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-colors ${
