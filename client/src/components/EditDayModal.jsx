@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { updateDay, getKnownMeals } from '../api.js';
+import { updateDay, getKnownMeals, addMeal } from '../api.js';
 
 const COOKS = ['Mom', 'Dad', 'Maya', 'Maddy', 'N/A'];
 
@@ -15,6 +15,7 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
   const [saving, setSaving]           = useState(false);
   const [knownMeals, setKnownMeals]   = useState([]);
   const [knownSides, setKnownSides]   = useState([]);
+  const [sideSearch, setSideSearch]    = useState('');
   const mealRef = useRef(null);
   const sidesRef = useRef(null);
 
@@ -40,10 +41,42 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
     ? knownMeals.filter(m => m.name.toLowerCase().includes(mealSearch.toLowerCase()))
     : knownMeals;
 
+  const filteredSides = sideSearch.length > 0
+    ? knownSides.filter(s => s.name.toLowerCase().includes(sideSearch.toLowerCase()))
+    : knownSides;
+
+  const mealSearchIsNew = mealSearch.trim().length > 0 &&
+    !knownMeals.some(m => m.name.toLowerCase() === mealSearch.trim().toLowerCase());
+
+  const sideSearchIsNew = sideSearch.trim().length > 0 &&
+    !knownSides.some(s => s.name.toLowerCase() === sideSearch.trim().toLowerCase());
+
   const handlePickMeal = (meal) => {
     setSelectedMeal(meal);
     setMealSearch(meal.name);
     setMealDropOpen(false);
+  };
+
+  const handleAddCustomMeal = async () => {
+    const name = mealSearch.trim();
+    if (!name) return;
+    const newMeal = { name, link: null, notes: null };
+    try {
+      await addMeal({ name, type: 'meal' });
+      setKnownMeals(prev => [...prev, newMeal]);
+    } catch { /* still use it locally */ }
+    handlePickMeal(newMeal);
+  };
+
+  const handleAddCustomSide = async () => {
+    const name = sideSearch.trim();
+    if (!name) return;
+    try {
+      await addMeal({ name, type: 'side' });
+      setKnownSides(prev => [...prev, { name }]);
+    } catch { /* still use it locally */ }
+    setSelectedSides(prev => [...prev, name]);
+    setSideSearch('');
   };
 
   const toggleSide = (sideName) => {
@@ -111,6 +144,15 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
                   />
                 </div>
                 <div className="overflow-y-auto">
+                  {mealSearchIsNew && (
+                    <button
+                      type="button"
+                      onClick={handleAddCustomMeal}
+                      className="w-full text-left px-3 py-2 text-sm border-b border-gray-100 text-brand-600 hover:bg-brand-50 font-medium flex items-center gap-1.5"
+                    >
+                      <span className="text-brand-500">＋</span> Add "{mealSearch.trim()}" as new meal
+                    </button>
+                  )}
                   {filteredMeals.map((meal, i) => (
                     <button
                       key={i}
@@ -126,7 +168,7 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
                       {meal.link && <span className="text-xs text-brand-400 ml-2">↗ recipe</span>}
                     </button>
                   ))}
-                  {filteredMeals.length === 0 && (
+                  {filteredMeals.length === 0 && !mealSearchIsNew && (
                     <p className="px-3 py-3 text-sm text-gray-400 italic">No matches</p>
                   )}
                 </div>
@@ -159,30 +201,51 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
             )}
             <button
               type="button"
-              onClick={() => setSidesDropOpen(v => !v)}
+              onClick={() => { setSidesDropOpen(v => !v); setSideSearch(''); }}
               className="w-full flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white hover:bg-gray-50"
             >
               <span className="text-gray-400">{sidesDropOpen ? 'Close' : '+ Add sides...'}</span>
               <span className="text-gray-400">{sidesDropOpen ? '▲' : '▼'}</span>
             </button>
             {sidesDropOpen && (
-              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                {knownSides.map((side, i) => {
-                  const picked = selectedSides.includes(side.name);
-                  return (
+              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col" style={{maxHeight: '220px'}}>
+                <div className="p-2 border-b border-gray-100 flex-shrink-0">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={sideSearch}
+                    onChange={e => setSideSearch(e.target.value)}
+                    placeholder="Search sides..."
+                    className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+                  />
+                </div>
+                <div className="overflow-y-auto">
+                  {sideSearchIsNew && (
                     <button
-                      key={i}
                       type="button"
-                      onClick={() => toggleSide(side.name)}
-                      className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between border-b border-gray-50 last:border-0 transition-colors ${
-                        picked ? 'bg-brand-50 text-brand-700' : 'hover:bg-gray-50 text-gray-800'
-                      }`}
+                      onClick={handleAddCustomSide}
+                      className="w-full text-left px-3 py-2 text-sm border-b border-gray-100 text-brand-600 hover:bg-brand-50 font-medium flex items-center gap-1.5"
                     >
-                      {side.name}
-                      {picked && <span className="text-brand-500 font-bold">✓</span>}
+                      <span className="text-brand-500">＋</span> Add "{sideSearch.trim()}" as new side
                     </button>
-                  );
-                })}
+                  )}
+                  {filteredSides.map((side, i) => {
+                    const picked = selectedSides.includes(side.name);
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => toggleSide(side.name)}
+                        className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between border-b border-gray-50 last:border-0 transition-colors ${
+                          picked ? 'bg-brand-50 text-brand-700' : 'hover:bg-gray-50 text-gray-800'
+                        }`}
+                      >
+                        {side.name}
+                        {picked && <span className="text-brand-500 font-bold">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
