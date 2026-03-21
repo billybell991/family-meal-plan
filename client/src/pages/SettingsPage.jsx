@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail } from '../api.js';
+import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, getChoreDefinitions, saveChoreDefinitions } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -18,18 +18,29 @@ export default function SettingsPage() {
   const [csvText, setCsvText] = useState('');
   const [csvMode, setCsvMode] = useState(false);
   const [allergyText, setAllergyText] = useState({});
+  const [choreData, setChoreData] = useState(null);
+  const [chorePrefText, setChorePrefText] = useState({});
+  const [choreDislikeText, setChoreDislikeText] = useState({});
 
   useEffect(() => {
-    Promise.all([getSettings(), getKnownMeals()])
-      .then(([s, m]) => {
+    Promise.all([getSettings(), getKnownMeals(), getChoreDefinitions()])
+      .then(([s, m, c]) => {
         setSettings(s.data);
         setMeals(m.data);
-        // seed raw text from loaded allergies
+        setChoreData(c.data);
         const text = {};
         FAMILY.forEach(member => {
           text[member] = (s.data.allergies?.[member] || []).join(', ');
         });
         setAllergyText(text);
+        const prefs = {};
+        const dislikes = {};
+        FAMILY.forEach(member => {
+          prefs[member] = (c.data.chorePreferences?.[member]?.preferred || []).join(', ');
+          dislikes[member] = (c.data.chorePreferences?.[member]?.disliked || []).join(', ');
+        });
+        setChorePrefText(prefs);
+        setChoreDislikeText(dislikes);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -38,6 +49,17 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await saveSettings(settings);
+      // Also save chore preferences if loaded
+      if (choreData) {
+        const prefs = {};
+        FAMILY.forEach(member => {
+          prefs[member] = {
+            preferred: (chorePrefText[member] || '').split(',').map(s => s.trim()).filter(Boolean),
+            disliked: (choreDislikeText[member] || '').split(',').map(s => s.trim()).filter(Boolean),
+          };
+        });
+        await saveChoreDefinitions({ ...choreData, chorePreferences: prefs });
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (e) {
@@ -232,6 +254,31 @@ export default function SettingsPage() {
           >+</button>
           <span className="text-sm text-gray-500">servings</span>
         </div>
+      </div>
+
+      {/* Chore Preferences */}
+      <div className="card p-6 space-y-4">
+        <h3 className="font-semibold text-gray-800 text-lg">🧹 Chore Preferences</h3>
+        <p className="text-sm text-gray-500">Tell the AI what chores each person prefers or dislikes. Comma-separated chore names.</p>
+        {FAMILY.map(member => (
+          <div key={member} className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">{member}</label>
+            <input
+              type="text"
+              value={chorePrefText[member] ?? ''}
+              onChange={e => setChorePrefText(prev => ({ ...prev, [member]: e.target.value }))}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              placeholder="Preferred chores, e.g. Walk Gus, Laundry"
+            />
+            <input
+              type="text"
+              value={choreDislikeText[member] ?? ''}
+              onChange={e => setChoreDislikeText(prev => ({ ...prev, [member]: e.target.value }))}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+              placeholder="Disliked chores, e.g. Clean bathroom"
+            />
+          </div>
+        ))}
       </div>
 
       {/* Save settings */}

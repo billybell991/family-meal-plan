@@ -1,0 +1,227 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { getChorePlan, generateChorePlan, deleteChorePlan, toggleChoreComplete } from '../api.js';
+import ChoreCard from '../components/ChoreCard.jsx';
+import LoadingSpinner from '../components/LoadingSpinner.jsx';
+
+const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const PROGRESS_STEPS = [
+  { pct: 10, icon: '📋', text: 'Loading chore library and preferences…' },
+  { pct: 30, icon: '👨‍👩‍👧‍👦', text: 'Checking family member availability…' },
+  { pct: 50, icon: '📊', text: 'Reviewing recent chore history for fairness…' },
+  { pct: 70, icon: '🤖', text: 'Asking Gemini AI to assign chores…' },
+  { pct: 90, icon: '✅', text: 'Almost done — building the schedule…' },
+];
+
+export default function ChoresPage() {
+  const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [progressStep, setProgressStep] = useState(0);
+  const [error, setError] = useState(null);
+  const progressTimer = useRef(null);
+
+  const loadPlan = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await getChorePlan();
+      setPlan(res.data);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setPlan(null);
+      } else {
+        setPlan(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadPlan(); }, [loadPlan]);
+
+  const handleGenerate = async () => {
+    if (plan && !window.confirm('This will replace the current chore plan. Are you sure?')) return;
+    setGenerating(true);
+    setProgressStep(0);
+    setError(null);
+
+    let step = 0;
+    progressTimer.current = setInterval(() => {
+      step = Math.min(step + 1, PROGRESS_STEPS.length - 1);
+      setProgressStep(step);
+    }, 3200);
+
+    try {
+      const res = await generateChorePlan();
+      setPlan(res.data);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to generate chore plan.');
+    } finally {
+      clearInterval(progressTimer.current);
+      setGenerating(false);
+    }
+  };
+
+  const handleToggleComplete = async (day, choreId, assignedTo, isCompleted) => {
+    try {
+      const res = await toggleChoreComplete(day, choreId, assignedTo, isCompleted);
+      setPlan(res.data);
+    } catch (err) {
+      console.error('Toggle complete failed:', err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Delete this week\'s chore plan entirely?')) return;
+    try {
+      await deleteChorePlan();
+      setPlan(null);
+    } catch (err) {
+      console.error('Delete failed', err);
+    }
+  };
+
+  const sortedDays = plan?.days
+    ? [...plan.days].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day))
+    : [];
+
+  const weekLabel = plan?.weekOf
+    ? `Week of ${new Date(plan.weekOf + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' })}`
+    : '';
+
+  // Stats
+  const totalChores = sortedDays.reduce((acc, d) => acc + (d.assignments?.length || 0), 0);
+  const completedChores = sortedDays.reduce((acc, d) => acc + (d.assignments?.filter(a => a.isCompleted).length || 0), 0);
+  const memberStats = {};
+  for (const d of sortedDays) {
+    for (const a of (d.assignments || [])) {
+      if (!memberStats[a.assignedTo]) memberStats[a.assignedTo] = { total: 0, done: 0 };
+      memberStats[a.assignedTo].total++;
+      if (a.isCompleted) memberStats[a.assignedTo].done++;
+    }
+  }
+
+  if (loading) return <LoadingSpinner message="Loading chore plan…" />;
+
+  return (
+    <div>
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Weekly Chore Plan</h2>
+          {weekLabel && <p className="text-sm text-gray-500 mt-0.5">{weekLabel}</p>}
+        </div>
+        <div className="flex items-center gap-3">
+          {plan && (
+            <button onClick={loadPlan} className="btn-secondary text-xs">🔄 Refresh</button>
+          )}
+          {plan && (
+            <button onClick={handleDelete} className="text-xs px-3 py-2 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 transition-colors">
+              🗑️ Delete Plan
+            </button>
+          )}
+          <button onClick={handleGenerate} disabled={generating} className="btn-primary">
+            {generating ? '⏳ Generating…' : `🧹 ${plan ? 'Re-generate Chores' : 'Generate Chore Plan'}`}
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 text-sm">⚠️ {error}</div>
+      )}
+
+      {!plan && !generating && (
+        <div className="card p-12 text-center">
+          <div className="text-5xl mb-4">🧹</div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No chore plan yet</h3>
+          <p className="text-gray-500 mb-6 max-w-md mx-auto">
+            Click "Generate Chore Plan" to let Gemini AI create fair, balanced chore assignments for everyone in the family.
+          </p>
+          <button onClick={handleGenerate} disabled={generating} className="btn-primary mx-auto">🧹 Generate Chore Plan</button>
+        </div>
+      )}
+
+      {generating && (() => {
+        const step = PROGRESS_STEPS[progressStep];
+        return (
+          <div className="card p-10 text-center">
+            <div className="text-5xl mb-5">{step.icon}</div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-1">Gemini is assigning chores…</h3>
+            <p className="text-gray-500 mb-6 text-sm">{step.text}</p>
+            <div className="w-full max-w-sm mx-auto bg-gray-100 rounded-full h-2.5 overflow-hidden">
+              <div className="bg-indigo-500 h-2.5 rounded-full transition-all duration-700 ease-out" style={{ width: `${step.pct}%` }} />
+            </div>
+            <p className="text-xs text-gray-400 mt-3">{step.pct}%</p>
+          </div>
+        );
+      })()}
+
+      {plan && !generating && (
+        <div className="lg:grid lg:grid-cols-[1fr_272px] lg:gap-8 lg:items-start">
+          <div>
+            <div className="grid grid-cols-1 gap-4">
+              {sortedDays.map(dayData => (
+                <ChoreCard
+                  key={dayData.day}
+                  dayData={dayData}
+                  onToggleComplete={handleToggleComplete}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-6 text-right lg:hidden">
+              Generated: {new Date(plan.generatedAt).toLocaleString()}
+            </p>
+          </div>
+
+          {/* Desktop sidebar */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 space-y-4">
+              {/* Progress */}
+              <div className="card p-5">
+                <h3 className="font-semibold text-sm text-slate-700 mb-4">Overall Progress</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-indigo-500 h-3 rounded-full transition-all"
+                      style={{ width: `${totalChores > 0 ? (completedChores / totalChores) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold text-slate-700">{completedChores}/{totalChores}</span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {totalChores > 0 ? Math.round((completedChores / totalChores) * 100) : 0}% complete
+                </p>
+              </div>
+
+              {/* Per member */}
+              {Object.keys(memberStats).length > 0 && (
+                <div className="card p-5">
+                  <h3 className="font-semibold text-sm text-slate-700 mb-4">👨‍👩‍👧‍👦 Member Progress</h3>
+                  <div className="space-y-2.5">
+                    {Object.entries(memberStats).sort((a, b) => b[1].total - a[1].total).map(([name, stats]) => (
+                      <div key={name} className="flex items-center gap-2">
+                        <span className="text-sm text-slate-600 w-14">{name}</span>
+                        <div className="flex-1 bg-slate-100 rounded-full h-2">
+                          <div
+                            className="bg-indigo-400 h-2 rounded-full transition-all"
+                            style={{ width: `${stats.total > 0 ? (stats.done / stats.total) * 100 : 0}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-slate-500 w-8 text-right">{stats.done}/{stats.total}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-400 text-center">
+                Generated: {new Date(plan.generatedAt).toLocaleString()}
+              </p>
+            </div>
+          </aside>
+        </div>
+      )}
+    </div>
+  );
+}

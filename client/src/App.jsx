@@ -1,13 +1,17 @@
 import { Routes, Route, NavLink } from 'react-router-dom';
+import DashboardPage from './pages/DashboardPage.jsx';
 import WeeklyPlanPage from './pages/WeeklyPlanPage.jsx';
+import ChoresPage from './pages/ChoresPage.jsx';
 import GroceryListPage from './pages/GroceryListPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
 import HistoryPage from './pages/HistoryPage.jsx';
 
 const NAV = [
-  { to: '/', label: '📅 This Week' },
-  { to: '/grocery', label: '🛒 Grocery List' },
-  { to: '/history', label: '📋 History' },
+  { to: '/', label: '📋 My Week' },
+  { to: '/meals', label: '🍽️ Meals' },
+  { to: '/chores', label: '🧹 Chores' },
+  { to: '/grocery', label: '🛒 Grocery' },
+  { to: '/history', label: '📊 History' },
   { to: '/settings', label: '⚙️ Settings' },
 ];
 
@@ -21,7 +25,7 @@ export default function App() {
             <span className="text-2xl">🍽️</span>
             <div>
               <h1 className="text-lg font-bold text-white leading-tight">Bell Family</h1>
-              <p className="text-xs text-brand-300 leading-tight">Meal Planner</p>
+              <p className="text-xs text-brand-300 leading-tight">Planner</p>
             </div>
           </div>
           <nav className="hidden sm:flex items-center gap-1">
@@ -65,7 +69,9 @@ export default function App() {
       {/* Main content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
         <Routes>
-          <Route path="/" element={<WeeklyPlanPage />} />
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/meals" element={<WeeklyPlanPage />} />
+          <Route path="/chores" element={<ChoresPage />} />
           <Route path="/grocery" element={<GroceryListPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
@@ -73,7 +79,7 @@ export default function App() {
       </main>
 
       <footer className="text-center text-xs text-slate-400 py-4 border-t border-slate-200">
-        Bell Family Meal Planner — AI-powered by Gemini
+        Bell Family Planner — AI-powered by Gemini
       </footer>
     </div>
   );

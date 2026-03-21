@@ -1,0 +1,59 @@
+{
+  "choreDefinitions": [
+    { "id": "dishwasher", "name": "Dishwasher (load/unload)", "category": "kitchen", "difficulty": "easy", "estimatedMinutes": 15, "frequency": "daily", "ageMin": 12 },
+    { "id": "sink-dishes", "name": "Sink/counter dishes", "category": "kitchen", "difficulty": "easy", "estimatedMinutes": 15, "frequency": "daily", "ageMin": 12 },
+    { "id": "clean-kitchen-table", "name": "Clean kitchen table", "category": "kitchen", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 10 },
+    { "id": "clean-kitchen", "name": "Clean up kitchen", "category": "kitchen", "difficulty": "medium", "estimatedMinutes": 20, "frequency": "daily", "ageMin": 12 },
+    { "id": "clean-appliance-fronts", "name": "Clean front of appliances", "category": "kitchen", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 12 },
+    { "id": "clean-stove-top", "name": "Clean stove top", "category": "kitchen", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 15 },
+    { "id": "clean-air-fryer", "name": "Clean air fryer", "category": "kitchen", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 12 },
+    { "id": "vacuum-basement-stairs", "name": "Vacuum basement stairs", "category": "floors", "difficulty": "medium", "estimatedMinutes": 15, "frequency": "weekly", "ageMin": 12 },
+    { "id": "vacuum-main-stairs", "name": "Vacuum main floor stairs", "category": "floors", "difficulty": "medium", "estimatedMinutes": 15, "frequency": "weekly", "ageMin": 12 },
+    { "id": "vacuum-upstairs", "name": "Vacuum upstairs", "category": "floors", "difficulty": "medium", "estimatedMinutes": 20, "frequency": "weekly", "ageMin": 15 },
+    { "id": "vacuum-basement", "name": "Vacuum basement", "category": "floors", "difficulty": "medium", "estimatedMinutes": 20, "frequency": "weekly", "ageMin": 15 },
+    { "id": "vacuum-clean-laminate", "name": "Vacuum and clean laminate floors", "category": "floors", "difficulty": "hard", "estimatedMinutes": 30, "frequency": "weekly", "ageMin": 15 },
+    { "id": "mop-floors", "name": "Mop kitchen/laundry room/front entrance", "category": "floors", "difficulty": "hard", "estimatedMinutes": 30, "frequency": "weekly", "ageMin": 15 },
+    { "id": "mop-bathroom-floors", "name": "Vacuum and mop bathroom floors", "category": "floors", "difficulty": "medium", "estimatedMinutes": 20, "frequency": "weekly", "ageMin": 15 },
+    { "id": "scrub-floors", "name": "Scrub floors", "category": "floors", "difficulty": "hard", "estimatedMinutes": 30, "frequency": "weekly", "ageMin": 15 },
+    { "id": "tidy-living-room", "name": "Tidy living rooms", "category": "rooms", "difficulty": "easy", "estimatedMinutes": 15, "frequency": "weekly", "ageMin": 10 },
+    { "id": "tidy-room", "name": "Tidy your room", "category": "rooms", "difficulty": "easy", "estimatedMinutes": 15, "frequency": "weekly", "ageMin": 10 },
+    { "id": "tidy-basement", "name": "Tidy basement", "category": "rooms", "difficulty": "medium", "estimatedMinutes": 20, "frequency": "weekly", "ageMin": 15 },
+    { "id": "clean-front-entrance", "name": "Clean front entrance", "category": "rooms", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 12 },
+    { "id": "clean-powder-room", "name": "Clean powder room", "category": "bathroom", "difficulty": "medium", "estimatedMinutes": 15, "frequency": "weekly", "ageMin": 12 },
+    { "id": "clean-bathroom", "name": "Clean bathroom", "category": "bathroom", "difficulty": "hard", "estimatedMinutes": 25, "frequency": "weekly", "ageMin": 15 },
+    { "id": "dust-main-floor", "name": "Dust main floor", "category": "rooms", "difficulty": "medium", "estimatedMinutes": 20, "frequency": "weekly", "ageMin": 12 },
+    { "id": "dust-railings", "name": "Dust railings", "category": "rooms", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 12 },
+    { "id": "laundry", "name": "Laundry", "category": "laundry", "difficulty": "medium", "estimatedMinutes": 20, "frequency": "weekly", "ageMin": 12 },
+    { "id": "fold-towels", "name": "Fold towels", "category": "laundry", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 10 },
+    { "id": "change-bath-mats", "name": "Change bath mats and hand towels", "category": "laundry", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 12 },
+    { "id": "wash-bathmats", "name": "Wash bathmats", "category": "laundry", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "biweekly", "ageMin": 12 },
+    { "id": "wash-blankets", "name": "Wash living room blankets", "category": "laundry", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "biweekly", "ageMin": 12 },
+    { "id": "recycling", "name": "Take out recycling", "category": "garbage", "difficulty": "easy", "estimatedMinutes": 5, "frequency": "daily", "ageMin": 10 },
+    { "id": "get-garbages", "name": "Get garbages together", "category": "garbage", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 12 },
+    { "id": "take-garbage-out", "name": "Take garbage out", "category": "garbage", "difficulty": "easy", "estimatedMinutes": 5, "frequency": "weekly", "ageMin": 12 },
+    { "id": "walk-gus", "name": "Walk Gus", "category": "pets", "difficulty": "easy", "estimatedMinutes": 20, "frequency": "daily", "ageMin": 12 },
+    { "id": "clean-hamster", "name": "Clean up around hamster", "category": "pets", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 10 },
+    { "id": "tidy-backyard", "name": "Tidy the backyard", "category": "outdoor", "difficulty": "medium", "estimatedMinutes": 30, "frequency": "weekly", "ageMin": 15 },
+    { "id": "clean-patio-door", "name": "Clean patio door", "category": "outdoor", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "biweekly", "ageMin": 12 },
+    { "id": "make-supper", "name": "Make supper", "category": "cooking", "difficulty": "hard", "estimatedMinutes": 45, "frequency": "daily", "ageMin": 15 },
+    { "id": "fill-toilet-paper", "name": "Fill toilet paper", "category": "bathroom", "difficulty": "easy", "estimatedMinutes": 5, "frequency": "weekly", "ageMin": 10 },
+    { "id": "clear-stairs", "name": "Clear stairs", "category": "rooms", "difficulty": "easy", "estimatedMinutes": 10, "frequency": "weekly", "ageMin": 10 },
+    { "id": "clean-container-cupboard", "name": "Clean container cupboard", "category": "kitchen", "difficulty": "easy", "estimatedMinutes": 15, "frequency": "monthly", "ageMin": 12 }
+  ],
+  "familyMembers": [
+    { "name": "Mom", "age": null, "isAdult": true },
+    { "name": "Dad", "age": null, "isAdult": true },
+    { "name": "Maya", "age": 20, "isAdult": true },
+    { "name": "Maddy", "age": 15, "isAdult": false }
+  ],
+  "chorePreferences": {
+    "Mom": { "preferred": [], "disliked": [] },
+    "Dad": { "preferred": [], "disliked": [] },
+    "Maya": { "preferred": [], "disliked": [] },
+    "Maddy": { "preferred": [], "disliked": [] }
+  },
+  "notes": {
+    "vacuumFloors": "Vacuum Floors means using the Roomba unless it's stairs",
+    "doDishes": "Do Dishes means clean entire dish area: unload dishwasher, put away clean, clean new, wipe counters/stove"
+  }
+}

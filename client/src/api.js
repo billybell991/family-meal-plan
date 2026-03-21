@@ -38,4 +38,15 @@ export const addMeal = (entry) => api.post('/settings/meals', entry);
 export const rerollSurprise = (day) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/reroll`);
 export const sendNotificationEmail = () => api.post('/settings/send-notification');
 
+// Chores
+export const getChoreDefinitions = () => api.get('/chores/definitions');
+export const saveChoreDefinitions = (data) => api.put('/chores/definitions', data);
+export const getChorePlan = () => api.get('/chores/plan');
+export const generateChorePlan = () => api.post('/chores/plan/generate');
+export const deleteChorePlan = () => api.delete('/chores/plan');
+export const toggleChoreComplete = (day, choreId, assignedTo, isCompleted) =>
+  api.patch(`/chores/plan/day/${encodeURIComponent(day)}/complete`, { choreId, assignedTo, isCompleted });
+export const getChoreHistory = () => api.get('/chores/history');
+export const sendChoreNotificationEmail = () => api.post('/chores/send-notification');
+
 export const getRecipes = () => api.get('/recipes');

@@ -7,6 +7,7 @@ const mealPlanRoutes = require('./routes/mealPlan');
 const groceryRoutes = require('./routes/grocery');
 const settingsRoutes = require('./routes/settings');
 const recipesRoutes = require('./routes/recipes');
+const choreRoutes = require('./routes/chores');
 const scheduler = require('./scheduler');
 
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/meal-plan', mealPlanRoutes);
 app.use('/api/grocery', groceryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/recipes', recipesRoutes);
+app.use('/api/chores', choreRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));

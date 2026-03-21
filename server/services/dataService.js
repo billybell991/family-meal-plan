@@ -1,13 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '../../data');
-const SEED_DIR = path.join(DATA_DIR, 'seed');
+const DATA_DIR = process.env.RENDER_DATA_DIR || path.join(__dirname, '../../data');
+const SEED_DIR = path.join(__dirname, '../../data/seed');
 const PLAN_FILE = path.join(DATA_DIR, 'current-plan.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'plan-history.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 const RATINGS_FILE = path.join(DATA_DIR, 'ratings.json');
 const MEALS_FILE = path.join(DATA_DIR, 'meals.json');
+const CHORES_FILE = path.join(DATA_DIR, 'chores.json');
+const CHORE_PLAN_FILE = path.join(DATA_DIR, 'current-chore-plan.json');
+const CHORE_HISTORY_FILE = path.join(DATA_DIR, 'chore-history.json');
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -170,6 +173,56 @@ function getRecentMealNames() {
   return [...names];
 }
 
+// ── Chores ────────────────────────────────────────────────────────────────────
+
+function getChoreDefinitions() {
+  return readJSON(CHORES_FILE, { choreDefinitions: [], familyMembers: [], chorePreferences: {}, notes: {} });
+}
+
+function saveChoreDefinitions(data) {
+  writeJSON(CHORES_FILE, data);
+  return data;
+}
+
+function getCurrentChorePlan() {
+  return readJSON(CHORE_PLAN_FILE, null);
+}
+
+function saveChorePlan(plan) {
+  writeJSON(CHORE_PLAN_FILE, plan);
+  // Append to history
+  const history = readJSON(CHORE_HISTORY_FILE, []);
+  history.unshift({ savedAt: new Date().toISOString(), weekOf: plan.weekOf, plan });
+  history.splice(12);
+  writeJSON(CHORE_HISTORY_FILE, history);
+}
+
+function writeChorePlanDirect(plan) {
+  writeJSON(CHORE_PLAN_FILE, plan);
+}
+
+function getChoreHistory() {
+  return readJSON(CHORE_HISTORY_FILE, []);
+}
+
+function deleteChorePlan() {
+  if (fs.existsSync(CHORE_PLAN_FILE)) fs.unlinkSync(CHORE_PLAN_FILE);
+}
+
+function getRecentChoreAssignments() {
+  const history = readJSON(CHORE_HISTORY_FILE, []);
+  const recent = history.slice(0, 4);
+  const assignments = [];
+  for (const entry of recent) {
+    for (const day of (entry.plan?.days || [])) {
+      for (const assignment of (day.assignments || [])) {
+        assignments.push({ ...assignment, day: day.day });
+      }
+    }
+  }
+  return assignments;
+}
+
 module.exports = {
   getCurrentPlan,
   savePlan,
@@ -186,4 +239,12 @@ module.exports = {
   getRecentMealNames,
   deletePlan,
   clearHistory,
+  getChoreDefinitions,
+  saveChoreDefinitions,
+  getCurrentChorePlan,
+  saveChorePlan,
+  writeChorePlanDirect,
+  getChoreHistory,
+  deleteChorePlan,
+  getRecentChoreAssignments,
 };
