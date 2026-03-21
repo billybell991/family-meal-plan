@@ -3,6 +3,16 @@ const path = require('path');
 
 const DATA_DIR = process.env.DATA_DIR || process.env.RENDER_DATA_DIR || path.join(__dirname, '../../data');
 const SEED_DIR = path.join(__dirname, '../../data/seed');
+
+// Startup diagnostics
+console.log('[DataService] DATA_DIR:', DATA_DIR);
+console.log('[DataService] SEED_DIR:', SEED_DIR);
+console.log('[DataService] DATA_DIR env:', process.env.DATA_DIR || '(not set)');
+console.log('[DataService] DATA_DIR exists:', fs.existsSync(DATA_DIR));
+if (fs.existsSync(DATA_DIR)) {
+  console.log('[DataService] DATA_DIR contents:', fs.readdirSync(DATA_DIR));
+}
+
 const PLAN_FILE = path.join(DATA_DIR, 'current-plan.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'plan-history.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
@@ -45,6 +55,7 @@ function seedIfNeeded() {
 }
 
 seedIfNeeded();
+console.log('[DataService] After seed, DATA_DIR contents:', fs.readdirSync(DATA_DIR));
 
 function readJSON(filePath, defaultVal = null) {
   try {

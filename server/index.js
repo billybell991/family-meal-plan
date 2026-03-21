@@ -27,7 +27,19 @@ app.use('/api/recipes', recipesRoutes);
 app.use('/api/chores', choreRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+app.get('/api/health', (req, res) => {
+  const fs = require('fs');
+  const dataDir = process.env.DATA_DIR || process.env.RENDER_DATA_DIR || 'unknown';
+  let files = [];
+  try { files = fs.readdirSync(dataDir); } catch (e) { files = [e.message]; }
+  res.json({
+    status: 'ok',
+    time: new Date().toISOString(),
+    dataDir,
+    dataDirEnv: process.env.DATA_DIR || '(not set)',
+    filesOnVolume: files,
+  });
+});
 
 // Fallback: serve React app for all non-API routes
 app.get(/^(?!\/api).*$/, (req, res) => {
