@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const { generateWeeklyPlan } = require('./services/geminiService');
 const { generateWeeklyChores } = require('./services/choreService');
 const { getRandomSundayCandidates } = require('./services/recipeService');
-const { sendMealPlanNotification, sendChorePlanNotification } = require('./services/notificationService');
+const { sendWeeklyNotification } = require('./services/notificationService');
 const {
   savePlan,
   getSettings,
@@ -67,14 +67,9 @@ async function runGeneration() {
       console.error('[Scheduler] Chore generation failed:', err.message);
     }
 
-    sendMealPlanNotification(plan, settings).catch(err =>
-      console.error('[Notify] Meal email failed:', err.message)
+    sendWeeklyNotification(plan, chorePlan, settings).catch(err =>
+      console.error('[Notify] Weekly email failed:', err.message)
     );
-    if (chorePlan) {
-      sendChorePlanNotification(chorePlan, settings).catch(err =>
-        console.error('[Notify] Chore email failed:', err.message)
-      );
-    }
     return plan;
   } catch (err) {
     console.error('[Scheduler] Failed to generate meal plan:', err.message);

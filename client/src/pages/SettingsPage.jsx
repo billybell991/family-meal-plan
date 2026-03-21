@@ -194,8 +194,8 @@ export default function SettingsPage() {
 
       {/* Notification Emails */}
       <div className="card p-6 space-y-4">
-        <h3 className="font-semibold text-gray-800 text-lg">📧 Notification Emails</h3>
-        <p className="text-sm text-gray-500">When the meal plan is auto-generated, an email will be sent to everyone on this list.</p>
+        <h3 className="font-semibold text-gray-800 text-lg">📧 Weekly Email Notification</h3>
+        <p className="text-sm text-gray-500">When the plan is generated, a combined email with meals + chores (broken down by person) will be sent here.</p>
         {(settings.notificationEmails || []).map((email, i) => (
           <div key={i} className="flex gap-2 items-center">
             <input
@@ -227,14 +227,14 @@ export default function SettingsPage() {
             onClick={async () => {
               try {
                 await sendNotificationEmail();
-                alert('Meal plan email sent!');
+                alert('Weekly plan email sent!');
               } catch (e) {
                 alert(e.response?.data?.error || 'Failed to send email.');
               }
             }}
             className="btn-secondary text-sm"
             disabled={!settings.notificationEmails?.length}
-          >📧 Send Email Now</button>
+          >📧 Send Weekly Email Now</button>
         </div>
       </div>
 

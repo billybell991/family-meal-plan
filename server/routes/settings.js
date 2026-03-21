@@ -10,8 +10,9 @@ const {
   getKnownMeals,
   saveKnownMeals,
   getCurrentPlan,
+  getCurrentChorePlan,
 } = require('../services/dataService');
-const { sendMealPlanNotification } = require('../services/notificationService');
+const { sendWeeklyNotification } = require('../services/notificationService');
 const scheduler = require('../scheduler');
 
 // GET /api/settings
@@ -31,16 +32,17 @@ router.put('/', (req, res) => {
   }
 });
 
-// POST /api/settings/send-notification — manually resend meal plan email
+// POST /api/settings/send-notification — send combined weekly email
 router.post('/send-notification', async (req, res) => {
   try {
-    const plan = getCurrentPlan();
-    if (!plan) return res.status(404).json({ error: 'No meal plan exists to send.' });
+    const mealPlan = getCurrentPlan();
+    const chorePlan = getCurrentChorePlan();
+    if (!mealPlan && !chorePlan) return res.status(404).json({ error: 'No meal or chore plan exists to send.' });
     const settings = getSettings();
     if (!settings.notificationEmails || settings.notificationEmails.length === 0) {
       return res.status(400).json({ error: 'No notification emails configured.' });
     }
-    await sendMealPlanNotification(plan, settings);
+    await sendWeeklyNotification(mealPlan, chorePlan, settings);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send email: ' + err.message });
