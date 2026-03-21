@@ -112,38 +112,40 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-          <h3 className="font-bold text-lg">Edit {dayData.day}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl">✕</button>
+          <h3 className="font-bold text-lg text-gray-900">Edit {dayData.day}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 text-xl p-1 -mr-1 rounded-full transition-colors" aria-label="Close modal">✕</button>
         </div>
 
-        <div className="px-6 py-4 space-y-4 overflow-y-auto">
+        {/* Scrollable content — min-h-0 lets flex shrink below content size */}
+        <div className="flex-grow min-h-0 overflow-y-auto px-6 py-4 space-y-5">
 
+          {/* ── Meal Picker ── */}
           <div ref={mealRef} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Meal</label>
             <button
               type="button"
               onClick={() => { setMealDropOpen(v => !v); setMealSearch(''); }}
-              className="w-full flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white hover:bg-gray-50"
+              className="w-full flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white hover:bg-gray-50 transition-colors"
             >
               <span className={selectedMeal ? 'text-gray-900' : 'text-gray-400'}>
                 {selectedMeal?.name || 'Choose a meal...'}
               </span>
-              <span className="text-gray-400 ml-2">{mealDropOpen ? '▲' : '▼'}</span>
+              <span className="text-gray-400 ml-2 text-xs">{mealDropOpen ? '▲' : '▼'}</span>
             </button>
 
             {mealDropOpen && (
-              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col" style={{maxHeight: '260px'}}>
+              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col max-h-60 overflow-hidden">
                 <div className="p-2 border-b border-gray-100 flex-shrink-0">
                   <input
                     autoFocus
                     type="text"
                     value={mealSearch}
                     onChange={e => setMealSearch(e.target.value)}
-                    placeholder="Search meals..."
+                    placeholder="Search or type new meal..."
                     className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                   />
                 </div>
-                <div className="overflow-y-auto">
+                <div className="flex-grow overflow-y-auto">
                   {mealSearchIsNew && (
                     <button
                       type="button"
@@ -187,14 +189,15 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
             )}
           </div>
 
+          {/* ── Sides Picker ── */}
           <div ref={sidesRef} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Sides</label>
             {selectedSides.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-2">
+              <div className="flex flex-wrap gap-1.5 mb-2 max-h-20 overflow-y-auto">
                 {selectedSides.map(s => (
                   <span key={s} className="inline-flex items-center gap-1 bg-brand-50 text-brand-700 border border-brand-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
                     {s}
-                    <button type="button" onClick={() => toggleSide(s)} className="hover:text-red-500 leading-none">×</button>
+                    <button type="button" onClick={() => toggleSide(s)} className="hover:text-red-500 leading-none p-0.5 -mr-0.5 rounded-full transition-colors" aria-label={`Remove ${s}`}>×</button>
                   </span>
                 ))}
               </div>
@@ -202,24 +205,24 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
             <button
               type="button"
               onClick={() => { setSidesDropOpen(v => !v); setSideSearch(''); }}
-              className="w-full flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white hover:bg-gray-50"
+              className="w-full flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white hover:bg-gray-50 transition-colors"
             >
               <span className="text-gray-400">{sidesDropOpen ? 'Close' : '+ Add sides...'}</span>
-              <span className="text-gray-400">{sidesDropOpen ? '▲' : '▼'}</span>
+              <span className="text-gray-400 text-xs">{sidesDropOpen ? '▲' : '▼'}</span>
             </button>
             {sidesDropOpen && (
-              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col" style={{maxHeight: '220px'}}>
+              <div className="absolute z-30 w-full bottom-full mb-1 bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col max-h-60 overflow-hidden">
                 <div className="p-2 border-b border-gray-100 flex-shrink-0">
                   <input
                     autoFocus
                     type="text"
                     value={sideSearch}
                     onChange={e => setSideSearch(e.target.value)}
-                    placeholder="Search sides..."
+                    placeholder="Search or type new side..."
                     className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                   />
                 </div>
-                <div className="overflow-y-auto">
+                <div className="flex-grow overflow-y-auto">
                   {sideSearchIsNew && (
                     <button
                       type="button"
@@ -250,6 +253,7 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
             )}
           </div>
 
+          {/* ── Cook Selector ── */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Who's Cooking?</label>
             <div className="flex flex-wrap gap-2">
@@ -258,10 +262,10 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
                   key={c}
                   type="button"
                   onClick={() => setCook(c)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-1 ${
                     cook === c
-                      ? 'bg-brand-500 text-white border-brand-500'
-                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      ? 'bg-brand-500 text-white border-brand-500 shadow-sm'
+                      : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
                   }`}
                 >
                   {c}
@@ -271,6 +275,7 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
           </div>
         </div>
 
+        {/* Footer — always visible */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 flex-shrink-0">
           <button onClick={onClose} className="btn-secondary">Cancel</button>
           <button onClick={handleSave} disabled={saving} className="btn-primary">
