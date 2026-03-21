@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * Ask Gemini to generate a weekly chore assignment plan for the Bell family.
  */
 async function generateWeeklyChores({ choreDefinitions = [], familyMembers = [], preferences = {}, recentAssignments = [], notes = {} }) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
   const choreList = choreDefinitions.map(c =>
     `- ${c.name} (id: ${c.id}, category: ${c.category}, difficulty: ${c.difficulty}, ~${c.estimatedMinutes}min, frequency: ${c.frequency}, min age: ${c.ageMin})`
@@ -48,16 +48,15 @@ ${recentSection}
 ${notesSection ? `HOUSEHOLD NOTES:\n${notesSection}` : ''}
 
 RULES:
-1. "daily" chores must be assigned every day (Sun-Sat), rotating the assignee. Not every daily chore needs to be done every single day — use judgement. For example, "Make supper" only needs one person per day.
-2. "weekly" chores should be assigned once during the week to one person.
-3. "biweekly" chores should be assigned this week (alternate weeks in practice).
-4. "monthly" chores: include 1-2 if they seem due.
-5. Respect ageMin — don't give chores requiring age 15+ to someone younger.
-6. Distribute workload fairly by total estimated minutes. Teens get lighter loads than adults.
-7. Respect preferences — assign preferred chores when possible, avoid disliked ones.
-8. Rotate fairly — if someone did a chore last week, give it to someone else this week.
-9. Sunday and Saturday can have more chores; weekdays should be lighter (people work/school).
-10. Every family member should have 2-4 chores per day, with lighter days being fine.
+1. "daily" chores: assign 2-3 daily chores per day, rotating assignees. "Make supper" only needs one person per day.
+2. "weekly" chores: assign once during the week.
+3. "biweekly" chores: include some this week.
+4. "monthly" chores: include 1 if it seems due.
+5. Respect ageMin — Maddy is 15, Maya is 20.
+6. Distribute workload fairly. Teens get lighter loads than adults.
+7. Respect preferences when provided.
+8. Each person should have 2-4 chores per day. Weekdays lighter, weekends heavier.
+9. Do NOT include every chore every week. Pick a reasonable subset — a typical family doesn't do all 39 chores weekly.
 
 RESPONSE FORMAT: Return ONLY valid JSON. No markdown, no explanation.
 {
