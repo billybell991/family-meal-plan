@@ -44,7 +44,7 @@ Saturday is planning day — Dad handles Saturday supper if needed.
     : '';
 
   const knownMealsSection = meals.length > 0
-    ? `KNOWN FAMILY SUPPERS — YOU MUST ONLY CHOOSE FROM THIS LIST (do NOT invent or suggest meals not on this list). The ONLY exception is Sunday's "Random Sunday" recipe which comes from the Bell Favorite Recipes site candidates below:\n${meals.map(m => {
+    ? `KNOWN FAMILY SUPPERS — FOR MONDAY THROUGH SATURDAY (excluding takeout/leftover nights).\nYou MUST ONLY choose from this list for Mon–Sat. Do NOT use any recipe from the "Random Sunday" candidates below for these days. Use the EXACT meal names as written:\n${meals.map(m => {
         const groceryHint = m.groceries?.length ? ` [needs: ${m.groceries.join(', ')}]` : '';
         const linkHint = m.link ? ` (${m.link})` : '';
         return `- ${m.name}${linkHint}${groceryHint}`;
@@ -59,7 +59,7 @@ Saturday is planning day — Dad handles Saturday supper if needed.
     : '';
 
   const randomCandidates = randomRecipes.length > 0
-    ? `RANDOM SUNDAY CANDIDATES from Bell Favorite Recipes site:\n${randomRecipes.map(r => `- ${r.name} (${r.url})`).join('\n')}\nPick ONE of these for Sunday's special recipe.`
+    ? `🔒 RANDOM SUNDAY CANDIDATES — FOR SUNDAY ONLY (do NOT use any of these for Monday–Saturday):\n${randomRecipes.map(r => `- ${r.name} (${r.url})`).join('\n')}\nPick exactly ONE of these for Sunday. These are ONLY for Sunday — never use them on any other day.`
     : '';
 
   const prompt = `You are a family meal planner AI for the Bell family (2 adults: Mom and Dad; 2 daughters: Maya and Maddy, teenagers).
@@ -79,7 +79,12 @@ ${knownSidesSection}
 ${randomCandidates}
 
 TASK: Generate a complete weekly meal plan for 7 days (Sunday through Saturday).
-CRITICAL: Every meal MUST come from the KNOWN FAMILY SUPPERS list above. Do NOT invent, create, or suggest any meal that is not on that list. Use the exact meal names as written. The ONLY exception is Sunday, which should use one of the Random Sunday Candidates from the Bell Favorite Recipes site.
+
+CRITICAL MEAL SOURCING RULES:
+- SUNDAY: Must use one of the "Random Sunday Candidates" from the Bell Favorite Recipes site.
+- MONDAY through SATURDAY (excluding takeout and leftover nights): MUST use meals from the "KNOWN FAMILY SUPPERS" list ONLY. Do NOT pick any meal from the Random Sunday Candidates for these days. These are quick, familiar family meals — use the exact names as written in the list.
+- Do NOT invent, create, or suggest any meal that is not on either list.
+
 For each day, provide:
 1. A main supper meal
 2. 1-2 sides

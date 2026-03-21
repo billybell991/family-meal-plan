@@ -12,6 +12,13 @@ const MEMBER_COLORS = {
   Maddy: 'bg-amber-100 text-amber-700 border-amber-200',
 };
 
+const MEMBER_DOTS = {
+  Mom: 'bg-purple-500',
+  Dad: 'bg-blue-500',
+  Maya: 'bg-pink-500',
+  Maddy: 'bg-amber-500',
+};
+
 export default function DashboardPage() {
   const [mealPlan, setMealPlan] = useState(null);
   const [chorePlan, setChorePlan] = useState(null);
@@ -37,11 +44,20 @@ export default function DashboardPage() {
     }
   };
 
-  const sortedDays = DAY_ORDER.map(dayName => {
-    const meal = mealPlan?.days?.find(d => d.day === dayName) || null;
-    const chore = chorePlan?.days?.find(d => d.day === dayName) || null;
-    return { day: dayName, meal, chore };
-  });
+  const sortedDays = (() => {
+    const all = DAY_ORDER.map(dayName => {
+      const meal = mealPlan?.days?.find(d => d.day === dayName) || null;
+      const chore = chorePlan?.days?.find(d => d.day === dayName) || null;
+      return { day: dayName, meal, chore };
+    });
+    // Pin today to top, keep rest in order
+    const todayIdx = all.findIndex(d => d.day === TODAY);
+    if (todayIdx > 0) {
+      const [todayItem] = all.splice(todayIdx, 1);
+      all.unshift(todayItem);
+    }
+    return all;
+  })();
 
   // Stats
   const totalChores = chorePlan?.days?.reduce((acc, d) => acc + (d.assignments?.length || 0), 0) || 0;
@@ -86,7 +102,7 @@ export default function DashboardPage() {
               const completedCount = assignments.filter(a => a.isCompleted).length;
 
               return (
-                <div key={day} className={`card border-l-4 ${isToday ? 'border-brand-500' : 'border-slate-200'} flex flex-col`}>
+                <div key={day} className={`card border-l-4 ${isToday ? 'border-brand-500 ring-2 ring-brand-200 shadow-lg' : 'border-slate-200'} flex flex-col`}>
                   <button
                     className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors"
                     onClick={() => setExpandedDay(isExpanded ? null : day)}
@@ -113,6 +129,13 @@ export default function DashboardPage() {
                           <span className="text-sm font-medium text-slate-700 truncate">{meal.meal.name}</span>
                         ) : (
                           <span className="text-sm text-slate-400 italic">No meal</span>
+                        )}
+                        {/* Cook with color dot */}
+                        {meal?.cook && !meal?.isTakeout && !meal?.isLeftover && (
+                          <span className="flex items-center gap-1 ml-1 flex-shrink-0">
+                            <span className={`w-2 h-2 rounded-full ${MEMBER_DOTS[meal.cook] || 'bg-slate-400'}`}></span>
+                            <span className="text-xs text-slate-500">{meal.cook}</span>
+                          </span>
                         )}
                       </div>
 
