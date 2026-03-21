@@ -29,15 +29,28 @@ app.use('/api/chores', choreRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   const fs = require('fs');
+  const pathMod = require('path');
   const dataDir = process.env.DATA_DIR || process.env.RENDER_DATA_DIR || 'unknown';
+  const seedDir = pathMod.join(__dirname, '../data/seed');
   let files = [];
   try { files = fs.readdirSync(dataDir); } catch (e) { files = [e.message]; }
+  let seedFiles = [];
+  try { seedFiles = fs.readdirSync(seedDir); } catch (e) { seedFiles = [e.message]; }
+  let mealsCheck = null;
+  try {
+    const mealsData = JSON.parse(fs.readFileSync(pathMod.join(dataDir, 'meals.json'), 'utf8'));
+    mealsCheck = { mealsCount: (mealsData.meals || []).length, sidesCount: (mealsData.sides || []).length };
+  } catch (e) { mealsCheck = { error: e.message }; }
   res.json({
     status: 'ok',
     time: new Date().toISOString(),
     dataDir,
     dataDirEnv: process.env.DATA_DIR || '(not set)',
     filesOnVolume: files,
+    seedDir,
+    seedDirExists: fs.existsSync(seedDir),
+    seedFiles,
+    mealsCheck,
   });
 });
 
