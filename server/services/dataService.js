@@ -16,14 +16,28 @@ function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// Copy seed data files to data dir if they don't exist yet (handles Render's ephemeral filesystem)
+// Copy seed data files to data dir if they don't exist or are empty/corrupt
 function seedIfNeeded() {
   ensureDataDir();
   if (!fs.existsSync(SEED_DIR)) return;
   const seedFiles = fs.readdirSync(SEED_DIR).filter(f => f.endsWith('.json'));
   for (const file of seedFiles) {
     const target = path.join(DATA_DIR, file);
-    if (!fs.existsSync(target)) {
+    let needsSeed = !fs.existsSync(target);
+    // Also re-seed if the file is empty or has no meaningful data
+    if (!needsSeed && file === 'meals.json') {
+      try {
+        const data = JSON.parse(fs.readFileSync(target, 'utf8'));
+        if (!data.meals || data.meals.length === 0) needsSeed = true;
+      } catch { needsSeed = true; }
+    }
+    if (!needsSeed && file === 'chores.json') {
+      try {
+        const data = JSON.parse(fs.readFileSync(target, 'utf8'));
+        if (!data.choreDefinitions || data.choreDefinitions.length === 0) needsSeed = true;
+      } catch { needsSeed = true; }
+    }
+    if (needsSeed) {
       fs.copyFileSync(path.join(SEED_DIR, file), target);
       console.log(`Seeded ${file} from seed data`);
     }
