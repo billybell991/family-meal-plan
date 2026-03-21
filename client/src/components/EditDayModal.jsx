@@ -50,9 +50,8 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
     !knownMeals.some(m => m.name.toLowerCase() === mealSearch.trim().toLowerCase());
 
   const sideSearchIsNew = sideSearch.trim().length > 0 &&
-    !knownSides.some(s => s.name.toLowerCase() === sideSearch.trim().toLowerCase()) &&
-    !selectedSides.some(s => s.toLowerCase() === sideSearch.trim().toLowerCase()) &&
-    filteredSides.length === 0;
+    !knownSides.some(s => s.name.toLowerCase().includes(sideSearch.trim().toLowerCase())) &&
+    !selectedSides.some(s => s.toLowerCase().includes(sideSearch.trim().toLowerCase()));
 
   const handlePickMeal = (meal) => {
     setSelectedMeal(meal);
@@ -235,22 +234,19 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
                       <span className="text-brand-500">＋</span> Add "{sideSearch.trim()}" as new side
                     </button>
                   )}
-                  {filteredSides.map((side, i) => {
-                    const picked = selectedSides.includes(side.name);
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => toggleSide(side.name)}
-                        className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between border-b border-gray-50 last:border-0 transition-colors ${
-                          picked ? 'bg-brand-50 text-brand-700' : 'hover:bg-gray-50 text-gray-800'
-                        }`}
-                      >
-                        {side.name}
-                        {picked && <span className="text-brand-500 font-bold">✓</span>}
-                      </button>
-                    );
-                  })}
+                  {filteredSides.map((side, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => toggleSide(side.name)}
+                      className="w-full text-left px-3 py-2 text-sm flex items-center justify-between border-b border-gray-50 last:border-0 transition-colors hover:bg-gray-50 text-gray-800"
+                    >
+                      {side.name}
+                    </button>
+                  ))}
+                  {filteredSides.length === 0 && !sideSearchIsNew && sideSearch.length > 0 && (
+                    <p className="px-3 py-3 text-sm text-gray-400 italic">Already added ✓</p>
+                  )}
                 </div>
               </div>
             )}
