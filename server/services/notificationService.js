@@ -68,7 +68,9 @@ async function sendMealPlanNotification(plan, settings) {
   }
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: { user: gmailUser, pass: gmailPass },
   });
 
@@ -142,7 +144,9 @@ async function sendChorePlanNotification(plan, settings) {
   }
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: { user: gmailUser, pass: gmailPass },
   });
 
