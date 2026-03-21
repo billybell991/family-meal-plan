@@ -193,7 +193,7 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
           <div ref={sidesRef} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Sides</label>
             {selectedSides.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-2 max-h-20 overflow-y-auto">
+              <div className="flex flex-wrap gap-1.5 mb-2">
                 {selectedSides.map(s => (
                   <span key={s} className="inline-flex items-center gap-1 bg-brand-50 text-brand-700 border border-brand-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
                     {s}
@@ -211,7 +211,7 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
               <span className="text-gray-400 text-xs">{sidesDropOpen ? '▲' : '▼'}</span>
             </button>
             {sidesDropOpen && (
-              <div className="absolute z-30 w-full bottom-full mb-1 bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col max-h-60 overflow-hidden">
+              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg flex flex-col max-h-60 overflow-hidden">
                 <div className="p-2 border-b border-gray-100 flex-shrink-0">
                   <input
                     autoFocus
