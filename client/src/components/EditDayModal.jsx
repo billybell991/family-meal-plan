@@ -41,15 +41,18 @@ export default function EditDayModal({ dayData, onClose, onSave }) {
     ? knownMeals.filter(m => m.name.toLowerCase().includes(mealSearch.toLowerCase()))
     : knownMeals;
 
-  const filteredSides = sideSearch.length > 0
+  const filteredSides = (sideSearch.length > 0
     ? knownSides.filter(s => s.name.toLowerCase().includes(sideSearch.toLowerCase()))
-    : knownSides;
+    : knownSides
+  ).filter(s => !selectedSides.includes(s.name));
 
   const mealSearchIsNew = mealSearch.trim().length > 0 &&
     !knownMeals.some(m => m.name.toLowerCase() === mealSearch.trim().toLowerCase());
 
   const sideSearchIsNew = sideSearch.trim().length > 0 &&
-    !knownSides.some(s => s.name.toLowerCase() === sideSearch.trim().toLowerCase());
+    !knownSides.some(s => s.name.toLowerCase() === sideSearch.trim().toLowerCase()) &&
+    !selectedSides.some(s => s.toLowerCase() === sideSearch.trim().toLowerCase()) &&
+    filteredSides.length === 0;
 
   const handlePickMeal = (meal) => {
     setSelectedMeal(meal);
