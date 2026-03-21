@@ -44,7 +44,7 @@ Saturday is planning day — Dad handles Saturday supper if needed.
     : '';
 
   const knownMealsSection = meals.length > 0
-    ? `KNOWN FAMILY SUPPERS (prefer these over inventing new ones):\n${meals.map(m => {
+    ? `KNOWN FAMILY SUPPERS — YOU MUST ONLY CHOOSE FROM THIS LIST (do NOT invent or suggest meals not on this list). The ONLY exception is Sunday's "Random Sunday" recipe which comes from the Bell Favorite Recipes site candidates below:\n${meals.map(m => {
         const groceryHint = m.groceries?.length ? ` [needs: ${m.groceries.join(', ')}]` : '';
         const linkHint = m.link ? ` (${m.link})` : '';
         return `- ${m.name}${linkHint}${groceryHint}`;
@@ -52,7 +52,7 @@ Saturday is planning day — Dad handles Saturday supper if needed.
     : '';
 
   const knownSidesSection = sides.length > 0
-    ? `KNOWN FAMILY SIDES (pick 1–2 that pair well with each meal):\n${sides.map(s => {
+    ? `KNOWN FAMILY SIDES — ONLY pick sides from this list:\n${sides.map(s => {
         const groceryHint = s.groceries?.length ? ` [needs: ${s.groceries.join(', ')}]` : '';
         return `- ${s.name}${groceryHint}`;
       }).join('\n')}`
@@ -79,6 +79,7 @@ ${knownSidesSection}
 ${randomCandidates}
 
 TASK: Generate a complete weekly meal plan for 7 days (Sunday through Saturday).
+CRITICAL: Every meal MUST come from the KNOWN FAMILY SUPPERS list above. Do NOT invent, create, or suggest any meal that is not on that list. Use the exact meal names as written. The ONLY exception is Sunday, which should use one of the Random Sunday Candidates from the Bell Favorite Recipes site.
 For each day, provide:
 1. A main supper meal
 2. 1-2 sides
