@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * Ask Gemini to generate a weekly chore assignment plan for the Bell family.
  */
 async function generateWeeklyChores({ choreDefinitions = [], familyMembers = [], preferences = {}, recentAssignments = [], notes = {} }) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-001' });
 
   const choreList = choreDefinitions.map(c =>
     `- ${c.name} (id: ${c.id}, category: ${c.category}, difficulty: ${c.difficulty}, ~${c.estimatedMinutes}min, frequency: ${c.frequency}, min age: ${c.ageMin})`
