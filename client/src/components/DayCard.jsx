@@ -4,7 +4,7 @@ import EditDayModal from './EditDayModal.jsx';
 import RatingStars from './RatingStars.jsx';
 
 const QUICK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
-const TODAY = new Date().toLocaleDateString('en-CA', { weekday: 'long' });
+const TODAY_DATE = new Date().toISOString().slice(0, 10);
 
 export default function DayCard({ dayData, onToggleTakeout, onUpdate }) {
   const [editOpen, setEditOpen]       = useState(false);
@@ -17,7 +17,7 @@ export default function DayCard({ dayData, onToggleTakeout, onUpdate }) {
   useEffect(() => { setPortionsLocal(dayData.portions ?? 4); }, [dayData.portions]);
 
   const isQuick = QUICK_DAYS.includes(dayData.day);
-  const isToday = dayData.day === TODAY;
+  const isToday = dayData.date === TODAY_DATE;
 
   const handlePortionChange = async (delta) => {
     const newVal = Math.max(1, Math.min(10, portionsLocal + delta));

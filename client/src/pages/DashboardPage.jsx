@@ -3,7 +3,7 @@ import { getMealPlan, getChorePlan, toggleChoreComplete, toggleTakeout, toggleLe
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const TODAY = new Date().toLocaleDateString('en-CA', { weekday: 'long' });
+const TODAY_DATE = new Date().toISOString().slice(0, 10);
 
 const MEMBER_COLORS = {
   Mom: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -23,12 +23,17 @@ export default function DashboardPage() {
   const [mealPlan, setMealPlan] = useState(null);
   const [chorePlan, setChorePlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [expandedDay, setExpandedDay] = useState(TODAY);
+  const [expandedDay, setExpandedDay] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     const [mealRes, choreRes] = await Promise.allSettled([getMealPlan(), getChorePlan()]);
-    if (mealRes.status === 'fulfilled') setMealPlan(mealRes.value.data);
+    if (mealRes.status === 'fulfilled') {
+      setMealPlan(mealRes.value.data);
+      // Auto-expand today
+      const todayEntry = mealRes.value.data?.days?.find(d => d.date === TODAY_DATE);
+      if (todayEntry) setExpandedDay(todayEntry.day);
+    }
     if (choreRes.status === 'fulfilled') setChorePlan(choreRes.value.data);
     setLoading(false);
   }, []);
@@ -51,7 +56,7 @@ export default function DashboardPage() {
       return { day: dayName, meal, chore };
     });
     // Pin today to top, keep rest in order
-    const todayIdx = all.findIndex(d => d.day === TODAY);
+    const todayIdx = all.findIndex(d => d.meal?.date === TODAY_DATE);
     if (todayIdx > 0) {
       const [todayItem] = all.splice(todayIdx, 1);
       all.unshift(todayItem);
@@ -96,7 +101,7 @@ export default function DashboardPage() {
         <div className="lg:grid lg:grid-cols-[1fr_240px] lg:gap-8 lg:items-start">
           <div className="space-y-3">
             {sortedDays.map(({ day, meal, chore }) => {
-              const isToday = day === TODAY;
+              const isToday = meal?.date === TODAY_DATE;
               const isExpanded = expandedDay === day;
               const assignments = chore?.assignments || [];
               const completedCount = assignments.filter(a => a.isCompleted).length;
