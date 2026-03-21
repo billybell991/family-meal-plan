@@ -62,7 +62,9 @@ if (fs.existsSync(SEED_DIR)) console.log('[DataService] SEED_DIR contents:', fs.
 function readJSON(filePath, defaultVal = null) {
   try {
     if (!fs.existsSync(filePath)) return defaultVal;
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    // Strip BOM if present (common when files are edited on Windows)
+    const raw = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '');
+    return JSON.parse(raw);
   } catch {
     return defaultVal;
   }
