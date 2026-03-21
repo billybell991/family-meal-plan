@@ -22,3 +22,5 @@ services:
         value: 5001
       - key: RENDER_DATA_DIR
         value: /data
+      - key: DATA_DIR
+        value: /data

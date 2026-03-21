@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = process.env.RENDER_DATA_DIR || path.join(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_DIR || process.env.RENDER_DATA_DIR || path.join(__dirname, '../../data');
 const SEED_DIR = path.join(__dirname, '../../data/seed');
 const PLAN_FILE = path.join(DATA_DIR, 'current-plan.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'plan-history.json');
