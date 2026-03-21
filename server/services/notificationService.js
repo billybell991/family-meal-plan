@@ -1,6 +1,12 @@
 'use strict';
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error('RESEND_API_KEY not set. Sign up at resend.com, get an API key, and add it as a Railway variable.');
+  return new Resend(apiKey);
+}
 
 function buildEmailHtml(plan) {
   const days = plan.days || [];
@@ -52,36 +58,24 @@ function buildEmailHtml(plan) {
 }
 
 async function sendMealPlanNotification(plan, settings) {
-  const gmailUser = process.env.NOTIFY_GMAIL_USER;
-  const gmailPass = process.env.NOTIFY_GMAIL_APP_PASSWORD;
+  const resend = getResendClient();
   const recipients = settings.notificationEmails;
 
-  if (!gmailUser || !gmailPass) {
-    const msg = 'NOTIFY_GMAIL_USER or NOTIFY_GMAIL_APP_PASSWORD not set. Add these env vars in Render dashboard.';
-    console.log('[Notify] ' + msg);
-    throw new Error(msg);
-  }
   if (!recipients || recipients.length === 0) {
     const msg = 'No notification email recipients configured.';
     console.log('[Notify] ' + msg);
     throw new Error(msg);
   }
 
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: { user: gmailUser, pass: gmailPass },
-  });
-
   const weekOf = plan.weekOf || '';
-  await transporter.sendMail({
-    from: `"Bell Meal Planner" <${gmailUser}>`,
-    to: recipients.join(', '),
+  const { error } = await resend.emails.send({
+    from: 'Bell Family Planner <onboarding@resend.dev>',
+    to: recipients,
     subject: `🍽️ Your meal plan is ready — week of ${weekOf}`,
     html: buildEmailHtml(plan),
   });
 
+  if (error) throw new Error(error.message);
   console.log(`[Notify] Email sent to: ${recipients.join(', ')}`);
 }
 
@@ -128,36 +122,24 @@ function buildChoreEmailHtml(plan) {
 }
 
 async function sendChorePlanNotification(plan, settings) {
-  const gmailUser = process.env.NOTIFY_GMAIL_USER;
-  const gmailPass = process.env.NOTIFY_GMAIL_APP_PASSWORD;
+  const resend = getResendClient();
   const recipients = settings.notificationEmails;
 
-  if (!gmailUser || !gmailPass) {
-    const msg = 'NOTIFY_GMAIL_USER or NOTIFY_GMAIL_APP_PASSWORD not set. Add these env vars in Render dashboard.';
-    console.log('[Notify] ' + msg);
-    throw new Error(msg);
-  }
   if (!recipients || recipients.length === 0) {
     const msg = 'No notification email recipients configured.';
     console.log('[Notify] ' + msg);
     throw new Error(msg);
   }
 
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: { user: gmailUser, pass: gmailPass },
-  });
-
   const weekOf = plan.weekOf || '';
-  await transporter.sendMail({
-    from: `"Bell Family Planner" <${gmailUser}>`,
-    to: recipients.join(', '),
+  const { error } = await resend.emails.send({
+    from: 'Bell Family Planner <onboarding@resend.dev>',
+    to: recipients,
     subject: `🧹 Your chore plan is ready — week of ${weekOf}`,
     html: buildChoreEmailHtml(plan),
   });
 
+  if (error) throw new Error(error.message);
   console.log(`[Notify] Chore email sent to: ${recipients.join(', ')}`);
 }
 
