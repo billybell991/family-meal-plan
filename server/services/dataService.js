@@ -56,6 +56,8 @@ function seedIfNeeded() {
 
 seedIfNeeded();
 console.log('[DataService] After seed, DATA_DIR contents:', fs.readdirSync(DATA_DIR));
+console.log('[DataService] SEED_DIR exists:', fs.existsSync(SEED_DIR));
+if (fs.existsSync(SEED_DIR)) console.log('[DataService] SEED_DIR contents:', fs.readdirSync(SEED_DIR));
 
 function readJSON(filePath, defaultVal = null) {
   try {
@@ -187,7 +189,17 @@ function getAverageRatings() {
 // ── Known Meals (from CSV upload or manual) ───────────────────────────────────
 
 function getKnownMeals() {
-  return readJSON(MEALS_FILE, { meals: [], sides: [] });
+  const data = readJSON(MEALS_FILE, { meals: [], sides: [] });
+  // If the data file is empty/corrupt, fall back to seed data
+  if ((!data.meals || data.meals.length === 0) && fs.existsSync(path.join(SEED_DIR, 'meals.json'))) {
+    const seed = readJSON(path.join(SEED_DIR, 'meals.json'), { meals: [], sides: [] });
+    if (seed.meals && seed.meals.length > 0) {
+      // Persist the seed data so this only happens once
+      writeJSON(MEALS_FILE, seed);
+      return seed;
+    }
+  }
+  return data;
 }
 
 function saveKnownMeals(data) {
