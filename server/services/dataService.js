@@ -93,6 +93,17 @@ function updateDayInPlan(dayName, updates) {
   const day = plan.days.find(d => d.day === dayName);
   if (!day) throw new Error(`Day "${dayName}" not found`);
   Object.assign(day, updates);
+
+  // Clear removed-grocery tracking when a meal changes so new ingredients show up
+  if (updates.meal || updates.sides !== undefined) {
+    plan.removedGroceryItems = (plan.removedGroceryItems || []).filter(item => {
+      // Only clear removals that were for the changed day's old ingredients
+      // Keep removals for other days intact — simplest: clear all for this day
+      const oldItems = (plan.groceryItems || []).filter(gi => gi.forDay === dayName);
+      return !oldItems.some(gi => gi.item.toLowerCase() === item.toLowerCase());
+    });
+  }
+
   writePlanDirect(plan);
   return plan;
 }
