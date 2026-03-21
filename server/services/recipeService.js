@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-const RECIPES_BASE = 'https://billybell991.github.io/bell-favorite-recipes';
+const RECIPES_BASE = 'https://bell-favorite-recipes.onrender.com';
 
 // Curated list of dinner-worthy recipes from the Bell Favorite Recipes site
 // (filtered to exclude desserts, snacks, preserved foods, and baking-only items)

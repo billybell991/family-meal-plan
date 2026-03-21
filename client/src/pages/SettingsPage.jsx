@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSettings, saveSettings, addMeal, getKnownMeals } from '../api.js';
+import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -196,10 +196,24 @@ export default function SettingsPage() {
             >✕</button>
           </div>
         ))}
-        <button
-          onClick={() => setSettings(s => ({ ...s, notificationEmails: [...(s.notificationEmails || []), ''] }))}
-          className="btn-secondary text-sm"
-        >+ Add email</button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSettings(s => ({ ...s, notificationEmails: [...(s.notificationEmails || []), ''] }))}
+            className="btn-secondary text-sm"
+          >+ Add email</button>
+          <button
+            onClick={async () => {
+              try {
+                await sendNotificationEmail();
+                alert('Meal plan email sent!');
+              } catch (e) {
+                alert(e.response?.data?.error || 'Failed to send email.');
+              }
+            }}
+            className="btn-secondary text-sm"
+            disabled={!settings.notificationEmails?.length}
+          >📧 Send Email Now</button>
+        </div>
       </div>
 
       {/* Default portions */}

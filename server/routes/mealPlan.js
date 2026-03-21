@@ -86,6 +86,39 @@ router.post('/generate', async (req, res) => {
   }
 });
 
+// PATCH /api/meal-plan/day/:day/reroll — reroll the surprise recipe for a day
+router.patch('/day/:day/reroll', (req, res) => {
+  try {
+    const { day } = req.params;
+    const plan = getCurrentPlan();
+    if (!plan) return res.status(404).json({ error: 'No meal plan exists.' });
+    const dayEntry = plan.days.find(d => d.day === day);
+    if (!dayEntry || !dayEntry.meal?.isRandomSunday) {
+      return res.status(400).json({ error: 'This day is not a surprise recipe day.' });
+    }
+    const recentMeals = getRecentMealNames();
+    // Also exclude the current surprise meal so we get something different
+    recentMeals.push(dayEntry.meal.name);
+    const candidates = getRandomSundayCandidates(1, recentMeals);
+    if (candidates.length === 0) {
+      return res.status(400).json({ error: 'No more surprise recipes available.' });
+    }
+    const pick = candidates[0];
+    const updatedPlan = updateDayInPlan(day, {
+      meal: {
+        name: pick.name,
+        link: pick.url,
+        description: dayEntry.meal.description || '',
+        isRandomSunday: true,
+        prepNote: null,
+      },
+    });
+    res.json(updatedPlan);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // PATCH /api/meal-plan/day/:day — update a specific day
 router.patch('/day/:day', (req, res) => {
   try {

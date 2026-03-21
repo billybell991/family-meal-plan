@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { updateDay, updatePortions, toggleTakeout, toggleLeftover } from '../api.js';
+import { updateDay, updatePortions, toggleTakeout, toggleLeftover, rerollSurprise } from '../api.js';
 import EditDayModal from './EditDayModal.jsx';
 import RatingStars from './RatingStars.jsx';
 
@@ -12,6 +12,7 @@ export default function DayCard({ dayData, onToggleTakeout, onUpdate }) {
   const [showIngredients, setShowIngredients] = useState(false);
   const [portionsLocal, setPortionsLocal] = useState(dayData.portions ?? 4);
   const [saving, setSaving]           = useState(false);
+  const [rerolling, setRerolling]     = useState(false);
 
   useEffect(() => { setPortionsLocal(dayData.portions ?? 4); }, [dayData.portions]);
 
@@ -171,6 +172,25 @@ export default function DayCard({ dayData, onToggleTakeout, onUpdate }) {
                       className="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
                       ♻️ Leftovers
                     </button>
+                    {dayData.meal?.isRandomSunday && (
+                      <button
+                        onClick={async () => {
+                          setRerolling(true);
+                          try {
+                            const res = await rerollSurprise(dayData.day);
+                            onUpdate(res.data);
+                          } catch (e) {
+                            console.error('Reroll failed', e);
+                          } finally {
+                            setRerolling(false);
+                          }
+                        }}
+                        disabled={rerolling}
+                        className="text-xs px-2.5 py-1 rounded-lg border border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors"
+                      >
+                        {rerolling ? '⏳ Rolling…' : '🎲 Reroll'}
+                      </button>
+                    )}
                     <button onClick={() => setEditOpen(true)}
                       className="text-xs px-2.5 py-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
                       ✏️ Edit

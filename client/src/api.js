@@ -35,4 +35,7 @@ export const addRating = (meal, member, stars) => api.post('/settings/ratings', 
 export const getKnownMeals = () => api.get('/settings/meals');
 export const addMeal = (entry) => api.post('/settings/meals', entry);
 
+export const rerollSurprise = (day) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/reroll`);
+export const sendNotificationEmail = () => api.post('/settings/send-notification');
+
 export const getRecipes = () => api.get('/recipes');
