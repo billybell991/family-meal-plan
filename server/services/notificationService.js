@@ -57,12 +57,14 @@ async function sendMealPlanNotification(plan, settings) {
   const recipients = settings.notificationEmails;
 
   if (!gmailUser || !gmailPass) {
-    console.log('[Notify] NOTIFY_GMAIL_USER or NOTIFY_GMAIL_APP_PASSWORD not set — skipping email.');
-    return;
+    const msg = 'NOTIFY_GMAIL_USER or NOTIFY_GMAIL_APP_PASSWORD not set. Add these env vars in Render dashboard.';
+    console.log('[Notify] ' + msg);
+    throw new Error(msg);
   }
   if (!recipients || recipients.length === 0) {
-    console.log('[Notify] No notification email recipients configured — skipping email.');
-    return;
+    const msg = 'No notification email recipients configured.';
+    console.log('[Notify] ' + msg);
+    throw new Error(msg);
   }
 
   const transporter = nodemailer.createTransport({
@@ -129,12 +131,14 @@ async function sendChorePlanNotification(plan, settings) {
   const recipients = settings.notificationEmails;
 
   if (!gmailUser || !gmailPass) {
-    console.log('[Notify] NOTIFY_GMAIL_USER or NOTIFY_GMAIL_APP_PASSWORD not set — skipping chore email.');
-    return;
+    const msg = 'NOTIFY_GMAIL_USER or NOTIFY_GMAIL_APP_PASSWORD not set. Add these env vars in Render dashboard.';
+    console.log('[Notify] ' + msg);
+    throw new Error(msg);
   }
   if (!recipients || recipients.length === 0) {
-    console.log('[Notify] No notification email recipients configured — skipping chore email.');
-    return;
+    const msg = 'No notification email recipients configured.';
+    console.log('[Notify] ' + msg);
+    throw new Error(msg);
   }
 
   const transporter = nodemailer.createTransport({

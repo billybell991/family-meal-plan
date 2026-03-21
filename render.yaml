@@ -12,6 +12,10 @@ services:
     envVars:
       - key: GEMINI_API_KEY
         sync: false
+      - key: NOTIFY_GMAIL_USER
+        sync: false
+      - key: NOTIFY_GMAIL_APP_PASSWORD
+        sync: false
       - key: NODE_ENV
         value: production
       - key: PORT
