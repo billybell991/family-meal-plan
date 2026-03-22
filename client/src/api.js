@@ -38,6 +38,7 @@ export const addMeal = (entry) => api.post('/settings/meals', entry);
 
 export const rerollSurprise = (day) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/reroll`);
 export const sendNotificationEmail = () => api.post('/settings/send-notification');
+export const sendDailyNotificationEmail = () => api.post('/settings/send-daily-notification');
 
 // Chores
 export const getChoreDefinitions = () => api.get('/chores/definitions');

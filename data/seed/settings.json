@@ -27,5 +27,8 @@
   "leftoverDay": "Tuesday",
   "groceryDays": ["Sunday", "Wednesday"],
   "defaultPortions": 4,
+  "dailyEmailEnabled": true,
+  "dailyEmailHour": 16,
+  "dailyEmailMinute": 0,
   "notificationEmails": []
 }

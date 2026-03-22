@@ -12,7 +12,7 @@ const {
   getCurrentPlan,
   getCurrentChorePlan,
 } = require('../services/dataService');
-const { sendWeeklyNotification } = require('../services/notificationService');
+const { sendWeeklyNotification, sendDailyNotification } = require('../services/notificationService');
 const scheduler = require('../scheduler');
 
 // GET /api/settings
@@ -46,6 +46,23 @@ router.post('/send-notification', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send email: ' + err.message });
+  }
+});
+
+// POST /api/settings/send-daily-notification — send today's daily email
+router.post('/send-daily-notification', async (req, res) => {
+  try {
+    const mealPlan = getCurrentPlan();
+    const chorePlan = getCurrentChorePlan();
+    if (!mealPlan && !chorePlan) return res.status(404).json({ error: 'No meal or chore plan exists to send.' });
+    const settings = getSettings();
+    if (!settings.notificationEmails || settings.notificationEmails.length === 0) {
+      return res.status(400).json({ error: 'No notification emails configured.' });
+    }
+    await sendDailyNotification(mealPlan, chorePlan, settings);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to send daily email: ' + err.message });
   }
 });
 

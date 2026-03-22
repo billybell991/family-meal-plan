@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, getChoreDefinitions, saveChoreDefinitions } from '../api.js';
+import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -306,6 +306,62 @@ export default function SettingsPage() {
             disabled={!settings.notificationEmails?.length}
           >📧 Send Weekly Email Now</button>
         </div>
+      </div>
+
+      {/* Daily Email */}
+      <div className="card p-6 space-y-4">
+        <h3 className="font-semibold text-gray-800 text-lg">📋 Daily Email Reminder</h3>
+        <p className="text-sm text-gray-500">
+          Get a daily email with just that day's supper and chore assignments — a quick "today's to-do" delivered to everyone's inbox.
+        </p>
+        <div className="flex items-center gap-3">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.dailyEmailEnabled ?? false}
+              onChange={e => setSettings(s => ({ ...s, dailyEmailEnabled: e.target.checked }))}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+          </label>
+          <span className="text-sm font-medium text-gray-700">
+            {settings.dailyEmailEnabled ? 'Enabled' : 'Disabled'}
+          </span>
+        </div>
+        {settings.dailyEmailEnabled && (
+          <>
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium text-gray-700">Send at</label>
+              <select
+                value={settings.dailyEmailHour ?? 16}
+                onChange={e => setSettings(s => ({ ...s, dailyEmailHour: Number(e.target.value) }))}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+              >
+                {HOURS.map(h => (
+                  <option key={h} value={h}>
+                    {String(h).padStart(2, '0')}:00 {h < 12 ? 'AM' : h === 12 ? 'PM' : 'PM'}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs text-gray-400">every day</span>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  await sendDailyNotificationEmail();
+                  alert("Today's daily email sent!");
+                } catch (e) {
+                  alert(e.response?.data?.error || 'Failed to send daily email.');
+                }
+              }}
+              className="btn-secondary text-sm"
+              disabled={!settings.notificationEmails?.length}
+            >📋 Send Today's Email Now</button>
+          </>
+        )}
+        {!settings.notificationEmails?.length && settings.dailyEmailEnabled && (
+          <p className="text-xs text-amber-600">⚠️ Add at least one email address above to receive daily emails.</p>
+        )}
       </div>
 
       {/* Default portions */}

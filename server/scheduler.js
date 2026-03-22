@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const { generateWeeklyPlan } = require('./services/geminiService');
 const { generateWeeklyChores } = require('./services/choreService');
 const { getRandomSundayCandidates } = require('./services/recipeService');
-const { sendWeeklyNotification } = require('./services/notificationService');
+const { sendWeeklyNotification, sendDailyNotification } = require('./services/notificationService');
 const {
   savePlan,
   getSettings,
@@ -12,9 +12,12 @@ const {
   getChoreDefinitions,
   saveChorePlan,
   getRecentChoreAssignments,
+  getCurrentPlan,
+  getCurrentChorePlan,
 } = require('./services/dataService');
 
 let scheduledTask = null;
+let dailyTask = null;
 
 function buildCronExpression(settings) {
   // e.g. Saturday at 12:00 → "0 12 * * 6"
@@ -79,6 +82,8 @@ async function runGeneration() {
 
 function init() {
   const settings = getSettings();
+
+  // ── Weekly generation cron ────────────────────────────────────────────────
   const cronExpr = buildCronExpression(settings);
   console.log(`[Scheduler] Scheduling meal plan generation: ${cronExpr} (${settings.scheduleDay} at ${settings.scheduleHour}:${String(settings.scheduleMinute).padStart(2, '0')})`);
 
@@ -87,6 +92,29 @@ function init() {
   scheduledTask = cron.schedule(cronExpr, () => {
     runGeneration().catch(err => console.error('[Scheduler] Cron error:', err));
   });
+
+  // ── Daily email cron ──────────────────────────────────────────────────────
+  if (dailyTask) dailyTask.stop();
+  dailyTask = null;
+
+  if (settings.dailyEmailEnabled && settings.notificationEmails?.length > 0) {
+    const dHour = settings.dailyEmailHour ?? 16;
+    const dMin = settings.dailyEmailMinute ?? 0;
+    const dailyCron = `${dMin} ${dHour} * * *`;
+    console.log(`[Scheduler] Scheduling daily email: ${dailyCron} (every day at ${String(dHour).padStart(2, '0')}:${String(dMin).padStart(2, '0')})`);
+
+    dailyTask = cron.schedule(dailyCron, () => {
+      const s = getSettings();
+      if (!s.dailyEmailEnabled) return;
+      const mealPlan = getCurrentPlan();
+      const chorePlan = getCurrentChorePlan();
+      sendDailyNotification(mealPlan, chorePlan, s).catch(err =>
+        console.error('[Notify] Daily email failed:', err.message)
+      );
+    });
+  } else {
+    console.log('[Scheduler] Daily email disabled or no recipients configured.');
+  }
 }
 
 function reschedule() {
