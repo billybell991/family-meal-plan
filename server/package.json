@@ -13,6 +13,7 @@
   "type": "commonjs",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@sendgrid/mail": "^8.1.6",
     "cors": "^2.8.6",
     "csv-parse": "^6.1.0",
     "date-fns": "^4.1.0",

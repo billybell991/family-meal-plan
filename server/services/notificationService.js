@@ -1,6 +1,6 @@
 'use strict';
 
-const { Resend } = require('resend');
+const sgMail = require('@sendgrid/mail');
 
 const APP_URL = 'https://family-weekly-planner.up.railway.app';
 
@@ -11,10 +11,10 @@ const MEMBER_COLORS = {
   Maddy: { bg: '#fef3c7', text: '#d97706', accent: '#f59e0b' },
 };
 
-function getResendClient() {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error('RESEND_API_KEY not set. Add it as a Railway variable.');
-  return new Resend(apiKey);
+function initSendGrid() {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey) throw new Error('SENDGRID_API_KEY not set. Add it as a Railway variable.');
+  sgMail.setApiKey(apiKey);
 }
 
 function buildCombinedEmailHtml(mealPlan, chorePlan) {
@@ -137,23 +137,31 @@ function buildCombinedEmailHtml(mealPlan, chorePlan) {
 }
 
 async function sendWeeklyNotification(mealPlan, chorePlan, settings) {
-  const resend = getResendClient();
+  initSendGrid();
   const recipients = settings.notificationEmails;
 
   if (!recipients || recipients.length === 0) {
     throw new Error('No notification email configured in Settings.');
   }
 
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL;
+  if (!fromEmail) throw new Error('SENDGRID_FROM_EMAIL not set. Add it as a Railway variable.');
+
   const weekOf = mealPlan?.weekOf || chorePlan?.weekOf || '';
-  const { error } = await resend.emails.send({
-    from: 'Bell Family Planner <onboarding@resend.dev>',
+  const msg = {
     to: recipients,
+    from: { email: fromEmail, name: 'Bell Family Planner' },
     subject: `🏠 Bell Family Plan — Week of ${weekOf}`,
     html: buildCombinedEmailHtml(mealPlan, chorePlan),
-  });
+  };
 
-  if (error) throw new Error(error.message);
-  console.log(`[Notify] Combined email sent to: ${recipients.join(', ')}`);
+  try {
+    await sgMail.send(msg);
+    console.log(`[Notify] Combined email sent to: ${recipients.join(', ')}`);
+  } catch (err) {
+    const body = err.response?.body;
+    throw new Error(body?.errors?.[0]?.message || err.message);
+  }
 }
 
 // Legacy exports for scheduler compatibility
