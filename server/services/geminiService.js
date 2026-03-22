@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * @param {Array}  opts.randomRecipes - Candidate recipes from bell-favorite-recipes
  * @returns {Object} Weekly plan keyed by day
  */
-async function generateWeeklyPlan({ meals = [], sides = [], allergies = {}, ratings = [], recentMeals = [], randomRecipes = [] }) {
+async function generateWeeklyPlan({ meals = [], sides = [], allergies = {}, ratings = [], recentMeals = [], randomRecipes = [], takeoutDay = 'Wednesday', leftoverDay = null }) {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const cookingTimeRules = `
@@ -22,7 +22,7 @@ COOKING TIME CONSTRAINTS (strictly follow these):
 - Saturday: Moderate time available.
 - Monday, Tuesday, Wednesday, Thursday: QUICK meals only — max 30 minutes prep+cook. Families are busy on weeknights.
 - Friday: Moderate time okay — start of weekend.
-- Wednesday is "Takeout Night" by default — mark it as takeout: true. No meal or grocery items needed for that day.
+- ${takeoutDay} is "Takeout Night" by default — mark it as takeout: true. No meal or grocery items needed for that day.
 
 FAMILY MEMBERS & COOKING ROTATION:
 Family members: Mom, Dad, Maya, Maddy
@@ -92,8 +92,8 @@ For each day, provide:
 4. A "to-do" note if any prep is needed the day before (e.g., "Thaw chicken tomorrow")
 5. A recipe link if one is available (from known meals list or from the Bell Favorite Recipes site)
 6. Default portions = 4 servings
-7. Wednesday must be takeout: true (no meal details needed)
-8. Pick ONE other night (not Wednesday, not Sunday) as leftover night: isLeftover: true (no meal details needed — the family eats leftovers from earlier in the week)
+7. ${takeoutDay} must be takeout: true (no meal details needed)
+8. ${leftoverDay ? `${leftoverDay} must be leftover night` : `Pick ONE other night (not ${takeoutDay}, not Sunday) as leftover night`}: isLeftover: true (no meal details needed — the family eats leftovers from earlier in the week)
 
 RESPONSE FORMAT: Return ONLY valid JSON. No markdown, no explanation. Use this exact structure:
 {

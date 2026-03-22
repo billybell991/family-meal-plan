@@ -173,6 +173,76 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Leftover night */}
+      <div className="card p-6 space-y-3">
+        <h3 className="font-semibold text-gray-800 text-lg">🍲 Default Leftover Night</h3>
+        <p className="text-sm text-gray-500">The AI will mark this day as Leftover Night by default. Choose "None" to let the AI pick. You can still override it per week on the plan.</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSettings(s => ({ ...s, leftoverDay: null }))}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              !settings.leftoverDay
+                ? 'bg-orange-500 text-white border-orange-500'
+                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            AI Picks
+          </button>
+          {DAYS.map(d => (
+            <button
+              key={d}
+              onClick={() => setSettings(s => ({ ...s, leftoverDay: d }))}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                settings.leftoverDay === d
+                  ? 'bg-orange-500 text-white border-orange-500'
+                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grocery days */}
+      <div className="card p-6 space-y-3">
+        <h3 className="font-semibold text-gray-800 text-lg">🛒 Grocery Day(s)</h3>
+        <p className="text-sm text-gray-500">
+          Select which days you shop for groceries. The grocery list will be split into trips — each trip shows only the ingredients needed for the meals between that grocery day and the next one.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {DAYS.map(d => {
+            const isSelected = (settings.groceryDays || []).includes(d);
+            return (
+              <button
+                key={d}
+                onClick={() => setSettings(s => {
+                  const current = s.groceryDays || [];
+                  return {
+                    ...s,
+                    groceryDays: isSelected
+                      ? current.filter(day => day !== d)
+                      : [...current, d],
+                  };
+                })}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                  isSelected
+                    ? 'bg-green-500 text-white border-green-500'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {d}
+              </button>
+            );
+          })}
+        </div>
+        {(settings.groceryDays || []).length > 0 && (
+          <p className="text-xs text-gray-400">
+            Currently: {(settings.groceryDays || []).sort((a, b) => DAYS.indexOf(a) - DAYS.indexOf(b)).join(', ')}
+          </p>
+        )}
+      </div>
+
       {/* Allergies */}
       <div className="card p-6 space-y-4">
         <h3 className="font-semibold text-gray-800 text-lg">🚫 Allergies & Dietary Restrictions</h3>

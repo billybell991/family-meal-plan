@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getCurrentPlan, getKnownMeals } = require('../services/dataService');
+const { getCurrentPlan, getKnownMeals, getSettings } = require('../services/dataService');
+
+const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
  * Build grocery list dynamically from the current meal plan.
@@ -71,17 +73,19 @@ function buildGroceryItems(plan) {
   return items;
 }
 
-// GET /api/grocery — generate grocery list from current plan
+// GET /api/grocery — generate grocery list from current plan, split by grocery days
 router.get('/', (req, res) => {
   const plan = getCurrentPlan();
   if (!plan) return res.status(404).json({ error: 'No meal plan found.' });
+  const settings = getSettings();
+  const groceryDays = settings.groceryDays && settings.groceryDays.length > 0
+    ? settings.groceryDays.sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b))
+    : null;
 
   const rawItems = buildGroceryItems(plan);
-
-  // Check for manually removed items
   const removedItems = new Set((plan.removedGroceryItems || []).map(i => i.toLowerCase().trim()));
 
-  // Deduplicate by item name (case-insensitive)
+  // Deduplicate
   const seen = new Set();
   const deduplicated = rawItems.filter(gi => {
     const key = gi.item.toLowerCase().trim();
@@ -91,18 +95,71 @@ router.get('/', (req, res) => {
     return true;
   });
 
-  // Categorize
-  const categorized = {};
-  for (const gi of deduplicated) {
-    const cat = categorize(gi.item);
-    if (!categorized[cat]) categorized[cat] = [];
-    categorized[cat].push(gi);
+  // If no grocery days configured, return flat list like before
+  if (!groceryDays) {
+    const categorized = {};
+    for (const gi of deduplicated) {
+      const cat = categorize(gi.item);
+      if (!categorized[cat]) categorized[cat] = [];
+      categorized[cat].push(gi);
+    }
+    return res.json({ sections: categorized, total: deduplicated.length, weekOf: plan.weekOf, trips: null });
   }
 
+  // Build meal-day ranges for each grocery trip
+  // Each grocery day covers from that day until the day before the next grocery day
+  const trips = groceryDays.map((grocDay, idx) => {
+    const startIdx = DAY_ORDER.indexOf(grocDay);
+    const nextGrocDay = groceryDays[(idx + 1) % groceryDays.length];
+    const endIdx = DAY_ORDER.indexOf(nextGrocDay);
+
+    // Build the set of days this trip covers
+    const coveredDays = [];
+    if (idx < groceryDays.length - 1) {
+      // Normal case: covers from grocDay up to (but not including) nextGrocDay
+      for (let i = startIdx; i < endIdx; i++) {
+        coveredDays.push(DAY_ORDER[i]);
+      }
+    } else {
+      // Last grocery day: wraps around to first grocery day
+      for (let i = startIdx; i < 7; i++) {
+        coveredDays.push(DAY_ORDER[i]);
+      }
+      const firstGrocIdx = DAY_ORDER.indexOf(groceryDays[0]);
+      for (let i = 0; i < firstGrocIdx; i++) {
+        coveredDays.push(DAY_ORDER[i]);
+      }
+    }
+
+    const coveredSet = new Set(coveredDays);
+    const tripItems = deduplicated.filter(gi => {
+      if (gi.forDay === 'Custom') return idx === 0; // custom items go with first trip
+      return coveredSet.has(gi.forDay);
+    });
+
+    // Categorize within trip
+    const categorized = {};
+    for (const gi of tripItems) {
+      const cat = categorize(gi.item);
+      if (!categorized[cat]) categorized[cat] = [];
+      categorized[cat].push(gi);
+    }
+
+    return {
+      groceryDay: grocDay,
+      coversFrom: coveredDays[0],
+      coversTo: coveredDays[coveredDays.length - 1],
+      coversDays: coveredDays,
+      sections: categorized,
+      total: tripItems.length,
+    };
+  });
+
   res.json({
-    sections: categorized,
+    trips,
     total: deduplicated.length,
     weekOf: plan.weekOf,
+    sections: null, // null when trips are used
   });
 });
 

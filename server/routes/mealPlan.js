@@ -76,6 +76,8 @@ router.post('/generate', async (req, res) => {
       ratings,
       recentMeals,
       randomRecipes,
+      takeoutDay: settings.takeoutDay || 'Wednesday',
+      leftoverDay: settings.leftoverDay || null,
     });
 
     savePlan(plan);
