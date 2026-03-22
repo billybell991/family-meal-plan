@@ -27,6 +27,7 @@ export const deletePlan = () => api.delete('/meal-plan');
 export const getGroceryList = () => api.get('/grocery');
 export const addCustomGroceryItem = (item) => api.post('/grocery/custom', { item });
 export const removeGroceryItem = (item) => api.delete('/grocery/item', { data: { item } });
+export const refreshGroceryList = () => api.post('/grocery/refresh');
 
 export const getSettings = () => api.get('/settings');
 export const saveSettings = (settings) => api.put('/settings', settings);

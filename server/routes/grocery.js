@@ -193,6 +193,26 @@ router.post('/custom', (req, res) => {
   }
 });
 
+// POST /api/grocery/refresh — rebuild groceryItems from known meals DB, clearing stale AI-generated items
+router.post('/refresh', (req, res) => {
+  try {
+    const { writePlanDirect } = require('../services/dataService');
+    const plan = getCurrentPlan();
+    if (!plan) return res.status(404).json({ error: 'No meal plan found.' });
+
+    // Rebuild grocery items from known meals/sides, keeping only custom items from the old list
+    const customItems = (plan.groceryItems || []).filter(gi => gi.forDay === 'Custom');
+    const rebuilt = buildGroceryItems({ ...plan, groceryItems: customItems });
+
+    plan.groceryItems = rebuilt;
+    plan.removedGroceryItems = [];
+    writePlanDirect(plan);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // DELETE /api/grocery/item — remove an item from grocery list
 router.delete('/item', (req, res) => {
   try {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getGroceryList, addCustomGroceryItem, removeGroceryItem } from '../api.js';
+import { getGroceryList, addCustomGroceryItem, removeGroceryItem, refreshGroceryList } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const SECTION_ICONS = {
@@ -79,6 +79,7 @@ export default function GroceryListPage() {
   });
   const [newItem, setNewItem] = useState('');
   const [adding, setAdding] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
   const loadList = useCallback(async () => {
@@ -138,6 +139,20 @@ export default function GroceryListPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshGroceryList();
+      clearChecked();
+      await loadList();
+    } catch (e) {
+      console.error('Refresh grocery list failed', e);
+      setError('Failed to refresh grocery list.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handlePrint = () => window.print();
 
   if (loading) return <LoadingSpinner message="Building grocery list…" />;
@@ -171,6 +186,9 @@ export default function GroceryListPage() {
           {Object.values(checked).some(Boolean) && (
             <button onClick={clearChecked} className="btn-secondary text-xs">✅ Clear Checked</button>
           )}
+          <button onClick={handleRefresh} disabled={refreshing} className="btn-secondary">
+            {refreshing ? '⏳ Refreshing…' : '🔄 Refresh List'}
+          </button>
           <button onClick={handlePrint} className="btn-secondary">🖨️ Print List</button>
         </div>
       </div>
