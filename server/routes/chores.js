@@ -115,13 +115,19 @@ router.post('/plan/generate', async (req, res) => {
     });
 
     // Sync "Make supper" chore with meal plan cook assignments
+    // Remove it entirely on takeout or leftover nights
     const mealPlan = getCurrentPlan();
     if (mealPlan?.days) {
       for (const choreDay of plan.days) {
         const mealDay = mealPlan.days.find(d => d.day === choreDay.day);
-        if (mealDay?.cook) {
+        const isMakeSupper = a => a.choreId === 'make-supper' || a.choreName?.toLowerCase().includes('make supper');
+
+        if (mealDay?.isTakeout || mealDay?.isLeftover) {
+          // No cooking needed — remove "Make supper" entirely
+          choreDay.assignments = choreDay.assignments.filter(a => !isMakeSupper(a));
+        } else if (mealDay?.cook) {
           for (const a of choreDay.assignments) {
-            if (a.choreId === 'make-supper' || a.choreName?.toLowerCase().includes('make supper')) {
+            if (isMakeSupper(a)) {
               a.assignedTo = mealDay.cook;
             }
           }

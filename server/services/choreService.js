@@ -48,7 +48,7 @@ ${recentSection}
 ${notesSection ? `HOUSEHOLD NOTES:\n${notesSection}` : ''}
 
 RULES:
-1. "daily" chores: assign 2-3 daily chores per day, rotating assignees. "Make supper" only needs one person per day.
+1. "daily" chores: assign 2-3 daily chores per day, rotating assignees. "Make supper" only needs one person per day. Do NOT assign "Make supper" on takeout or leftover nights.
 2. "weekly" chores: assign once during the week.
 3. "biweekly" chores: include some this week.
 4. "monthly" chores: include 1 if it seems due.
