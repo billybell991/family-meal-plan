@@ -148,15 +148,16 @@ async function sendWeeklyNotification(mealPlan, chorePlan, settings) {
   if (!fromEmail) throw new Error('SENDGRID_FROM_EMAIL not set. Add it as a Railway variable.');
 
   const weekOf = mealPlan?.weekOf || chorePlan?.weekOf || '';
-  const msg = {
-    to: recipients,
+  const htmlBody = buildCombinedEmailHtml(mealPlan, chorePlan);
+  const messages = recipients.map(email => ({
+    to: email,
     from: { email: fromEmail, name: 'Bell Family Planner' },
     subject: `🏠 Bell Family Plan — Week of ${weekOf}`,
-    html: buildCombinedEmailHtml(mealPlan, chorePlan),
-  };
+    html: htmlBody,
+  }));
 
   try {
-    await sgMail.send(msg);
+    await sgMail.send(messages);
     console.log(`[Notify] Combined email sent to: ${recipients.join(', ')}`);
   } catch (err) {
     const body = err.response?.body;
