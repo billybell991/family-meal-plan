@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-const RECIPES_BASE = 'https://bell-favorite-recipes.onrender.com';
+const RECIPES_BASE = 'https://bell-favorite-recipes.up.railway.app';
 
 // Curated list of dinner-worthy recipes from the Bell Favorite Recipes site
 // (filtered to exclude desserts, snacks, preserved foods, and baking-only items)
