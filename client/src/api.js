@@ -41,6 +41,9 @@ export const sendNotificationEmail = () => api.post('/settings/send-notification
 // Chores
 export const getChoreDefinitions = () => api.get('/chores/definitions');
 export const saveChoreDefinitions = (data) => api.put('/chores/definitions', data);
+export const addChoreDefinition = (chore) => api.post('/chores/definitions/chore', chore);
+export const updateChoreDefinition = (id, chore) => api.put(`/chores/definitions/chore/${encodeURIComponent(id)}`, chore);
+export const deleteChoreDefinition = (id) => api.delete(`/chores/definitions/chore/${encodeURIComponent(id)}`);
 export const getChorePlan = () => api.get('/chores/plan');
 export const generateChorePlan = () => api.post('/chores/plan/generate');
 export const deleteChorePlan = () => api.delete('/chores/plan');

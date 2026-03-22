@@ -1,9 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getChorePlan, generateChorePlan, deleteChorePlan, toggleChoreComplete } from '../api.js';
+import { getChorePlan, generateChorePlan, deleteChorePlan, toggleChoreComplete, getChoreDefinitions, addChoreDefinition, updateChoreDefinition, deleteChoreDefinition } from '../api.js';
 import ChoreCard from '../components/ChoreCard.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const CATEGORIES = ['kitchen', 'floors', 'rooms', 'bathroom', 'laundry', 'garbage', 'pets', 'outdoor', 'cooking', 'other'];
+const DIFFICULTIES = ['easy', 'medium', 'hard'];
+const FREQUENCIES = ['daily', 'weekly', 'biweekly', 'monthly'];
+const CATEGORY_ICONS = {
+  kitchen: '🍽️', floors: '🧹', rooms: '🛋️', bathroom: '🚿', laundry: '👕',
+  garbage: '🗑️', pets: '🐾', outdoor: '🌿', cooking: '👨‍🍳', other: '📋',
+};
 
 const PROGRESS_STEPS = [
   { pct: 10, icon: '📋', text: 'Loading chore library and preferences…' },
@@ -20,6 +27,13 @@ export default function ChoresPage() {
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState(null);
   const progressTimer = useRef(null);
+
+  // Chore library state
+  const [choreLibrary, setChoreLibrary] = useState([]);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [newChore, setNewChore] = useState({ name: '', category: 'rooms', difficulty: 'easy', estimatedMinutes: 15, frequency: 'weekly', ageMin: 10 });
+  const [editingChore, setEditingChore] = useState(null);
+  const [libraryFilter, setLibraryFilter] = useState('all');
 
   const loadPlan = useCallback(async () => {
     setLoading(true);
@@ -38,7 +52,16 @@ export default function ChoresPage() {
     }
   }, []);
 
-  useEffect(() => { loadPlan(); }, [loadPlan]);
+  const loadChoreLibrary = useCallback(async () => {
+    try {
+      const res = await getChoreDefinitions();
+      setChoreLibrary(res.data.choreDefinitions || []);
+    } catch (err) {
+      console.error('Failed to load chore library:', err);
+    }
+  }, []);
+
+  useEffect(() => { loadPlan(); loadChoreLibrary(); }, [loadPlan, loadChoreLibrary]);
 
   const handleGenerate = async () => {
     if (plan && !window.confirm('This will replace the current chore plan. Are you sure?')) return;
@@ -81,6 +104,49 @@ export default function ChoresPage() {
       console.error('Delete failed', err);
     }
   };
+
+  // Chore library handlers
+  const handleAddChore = async () => {
+    if (!newChore.name.trim()) return;
+    try {
+      await addChoreDefinition(newChore);
+      await loadChoreLibrary();
+      setNewChore({ name: '', category: 'rooms', difficulty: 'easy', estimatedMinutes: 15, frequency: 'weekly', ageMin: 10 });
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Failed to add chore.';
+      alert(msg);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingChore || !editingChore.name.trim()) return;
+    try {
+      await updateChoreDefinition(editingChore.id, editingChore);
+      await loadChoreLibrary();
+      setEditingChore(null);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to update chore.');
+    }
+  };
+
+  const handleDeleteChore = async (id) => {
+    if (!window.confirm('Remove this chore from the library? It won\'t affect the current plan.')) return;
+    try {
+      await deleteChoreDefinition(id);
+      await loadChoreLibrary();
+    } catch (err) {
+      console.error('Delete chore failed:', err);
+    }
+  };
+
+  const filteredLibrary = libraryFilter === 'all'
+    ? choreLibrary
+    : choreLibrary.filter(c => c.category === libraryFilter);
+
+  const groupedChores = filteredLibrary.reduce((acc, c) => {
+    (acc[c.category] = acc[c.category] || []).push(c);
+    return acc;
+  }, {});
 
   const sortedDays = plan?.days
     ? [...plan.days].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day))
@@ -222,6 +288,265 @@ export default function ChoresPage() {
           </aside>
         </div>
       )}
+
+      {/* ── Chore Library Management ─────────────────────────────── */}
+      <div className="mt-10">
+        <button
+          onClick={() => setLibraryOpen(v => !v)}
+          className="flex items-center gap-2 text-lg font-semibold text-gray-800 hover:text-indigo-600 transition-colors mb-4"
+        >
+          <span className={`transform transition-transform ${libraryOpen ? 'rotate-90' : ''}`}>▶</span>
+          📚 Chore Library ({choreLibrary.length})
+        </button>
+
+        {libraryOpen && (
+          <div className="space-y-4">
+            {/* Add new chore form */}
+            <div className="card p-5 space-y-3">
+              <h4 className="font-semibold text-gray-700 text-sm">Add New Chore</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  value={newChore.name}
+                  onChange={e => setNewChore(c => ({ ...c, name: e.target.value }))}
+                  placeholder="Chore name…"
+                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 sm:col-span-2 lg:col-span-1"
+                />
+                <select
+                  value={newChore.category}
+                  onChange={e => setNewChore(c => ({ ...c, category: e.target.value }))}
+                  className="rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{CATEGORY_ICONS[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                  ))}
+                </select>
+                <select
+                  value={newChore.difficulty}
+                  onChange={e => setNewChore(c => ({ ...c, difficulty: e.target.value }))}
+                  className="rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                >
+                  {DIFFICULTIES.map(d => (
+                    <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Frequency</label>
+                  <select
+                    value={newChore.frequency}
+                    onChange={e => setNewChore(c => ({ ...c, frequency: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    {FREQUENCIES.map(f => (
+                      <option key={f} value={f}>{f.charAt(0).toUpperCase() + f.slice(1)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Est. Minutes</label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="120"
+                    step="5"
+                    value={newChore.estimatedMinutes}
+                    onChange={e => setNewChore(c => ({ ...c, estimatedMinutes: Number(e.target.value) }))}
+                    className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Min Age</label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="99"
+                    value={newChore.ageMin}
+                    onChange={e => setNewChore(c => ({ ...c, ageMin: Number(e.target.value) }))}
+                    className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    onClick={handleAddChore}
+                    disabled={!newChore.name.trim()}
+                    className="btn-primary text-sm w-full"
+                  >
+                    + Add Chore
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Category filter pills */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setLibraryFilter('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  libraryFilter === 'all'
+                    ? 'bg-indigo-500 text-white border-indigo-500'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                All ({choreLibrary.length})
+              </button>
+              {CATEGORIES.filter(cat => choreLibrary.some(c => c.category === cat)).map(cat => {
+                const count = choreLibrary.filter(c => c.category === cat).length;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setLibraryFilter(cat)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                      libraryFilter === cat
+                        ? 'bg-indigo-500 text-white border-indigo-500'
+                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {CATEGORY_ICONS[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)} ({count})
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Edit modal inline */}
+            {editingChore && (
+              <div className="card p-5 border-2 border-indigo-300 space-y-3">
+                <h4 className="font-semibold text-indigo-700 text-sm">✏️ Editing: {editingChore.name}</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <input
+                    type="text"
+                    value={editingChore.name}
+                    onChange={e => setEditingChore(c => ({ ...c, name: e.target.value }))}
+                    className="rounded-lg border border-indigo-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 sm:col-span-2 lg:col-span-1"
+                  />
+                  <select
+                    value={editingChore.category}
+                    onChange={e => setEditingChore(c => ({ ...c, category: e.target.value }))}
+                    className="rounded-lg border border-indigo-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{CATEGORY_ICONS[cat]} {cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={editingChore.difficulty}
+                    onChange={e => setEditingChore(c => ({ ...c, difficulty: e.target.value }))}
+                    className="rounded-lg border border-indigo-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    {DIFFICULTIES.map(d => (
+                      <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Frequency</label>
+                    <select
+                      value={editingChore.frequency}
+                      onChange={e => setEditingChore(c => ({ ...c, frequency: e.target.value }))}
+                      className="w-full rounded-lg border border-indigo-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    >
+                      {FREQUENCIES.map(f => (
+                        <option key={f} value={f}>{f.charAt(0).toUpperCase() + f.slice(1)}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Est. Minutes</label>
+                    <input
+                      type="number"
+                      min="5"
+                      max="120"
+                      step="5"
+                      value={editingChore.estimatedMinutes}
+                      onChange={e => setEditingChore(c => ({ ...c, estimatedMinutes: Number(e.target.value) }))}
+                      className="w-full rounded-lg border border-indigo-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Min Age</label>
+                    <input
+                      type="number"
+                      min="5"
+                      max="99"
+                      value={editingChore.ageMin}
+                      onChange={e => setEditingChore(c => ({ ...c, ageMin: Number(e.target.value) }))}
+                      className="w-full rounded-lg border border-indigo-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <button onClick={handleSaveEdit} className="btn-primary text-sm flex-1">💾 Save</button>
+                    <button onClick={() => setEditingChore(null)} className="btn-secondary text-sm">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chore list grouped by category */}
+            <div className="space-y-3">
+              {Object.entries(groupedChores)
+                .sort(([a], [b]) => CATEGORIES.indexOf(a) - CATEGORIES.indexOf(b))
+                .map(([category, chores]) => (
+                  <div key={category} className="card p-4">
+                    <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      {CATEGORY_ICONS[category] || '📋'} {category}
+                    </h4>
+                    <div className="space-y-1.5">
+                      {chores.sort((a, b) => a.name.localeCompare(b.name)).map(chore => (
+                        <div
+                          key={chore.id}
+                          className="flex items-center justify-between gap-3 py-1.5 px-2 rounded-lg hover:bg-gray-50 group transition-colors"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-sm text-gray-800 truncate">{chore.name}</span>
+                            <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                chore.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
+                                chore.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {chore.difficulty}
+                              </span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                                {chore.frequency}
+                              </span>
+                              <span className="text-[10px] text-gray-400">
+                                ~{chore.estimatedMinutes}min
+                              </span>
+                              {chore.ageMin > 10 && (
+                                <span className="text-[10px] text-gray-400">
+                                  {chore.ageMin}+
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                            <button
+                              onClick={() => setEditingChore({ ...chore })}
+                              className="text-xs px-2 py-1 rounded text-indigo-500 hover:bg-indigo-50 transition-colors"
+                              title="Edit chore"
+                            >✏️</button>
+                            <button
+                              onClick={() => handleDeleteChore(chore.id)}
+                              className="text-xs px-2 py-1 rounded text-red-400 hover:bg-red-50 transition-colors"
+                              title="Remove chore"
+                            >✕</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              {filteredLibrary.length === 0 && (
+                <div className="text-center py-8 text-gray-400 text-sm">
+                  {libraryFilter === 'all' ? 'No chores in the library yet. Add one above!' : `No chores in "${libraryFilter}" category.`}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
