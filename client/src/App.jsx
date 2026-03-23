@@ -7,12 +7,12 @@ import SettingsPage from './pages/SettingsPage.jsx';
 import HistoryPage from './pages/HistoryPage.jsx';
 
 const NAV = [
-  { to: '/', label: '📋 My Week' },
-  { to: '/meals', label: '🍽️ Meals' },
-  { to: '/chores', label: '🧹 Chores' },
-  { to: '/grocery', label: '🛒 Grocery' },
-  { to: '/history', label: '📊 History' },
-  { to: '/settings', label: '⚙️ Settings' },
+  { to: '/', icon: '📋', label: 'My Week' },
+  { to: '/meals', icon: '🍽️', label: 'Meals' },
+  { to: '/chores', icon: '🧹', label: 'Chores' },
+  { to: '/grocery', icon: '🛒', label: 'Grocery' },
+  { to: '/history', icon: '📊', label: 'History' },
+  { to: '/settings', icon: '⚙️', label: 'Settings' },
 ];
 
 export default function App() {
@@ -29,7 +29,7 @@ export default function App() {
             </div>
           </div>
           <nav className="hidden sm:flex items-center gap-1">
-            {NAV.map(({ to, label }) => (
+            {NAV.map(({ to, icon, label }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -42,25 +42,26 @@ export default function App() {
                   }`
                 }
               >
-                {label}
+                {icon} {label}
               </NavLink>
             ))}
           </nav>
         </div>
         {/* Mobile nav */}
         <div className="sm:hidden flex border-t border-brand-800">
-          {NAV.map(({ to, label }) => (
+          {NAV.map(({ to, icon, label }) => (
             <NavLink
               key={to}
               to={to}
               end={to === '/'}
               className={({ isActive }) =>
-                `flex-1 text-center py-2.5 text-xs font-medium transition-colors ${
+                `flex-1 flex flex-col items-center py-2 gap-0.5 transition-colors ${
                   isActive ? 'text-white border-b-2 border-brand-300' : 'text-brand-300 hover:text-white'
                 }`
               }
             >
-              {label}
+              <span className="text-base leading-none">{icon}</span>
+              <span className="text-[10px] font-medium leading-none">{label}</span>
             </NavLink>
           ))}
         </div>

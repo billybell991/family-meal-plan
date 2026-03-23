@@ -183,17 +183,20 @@ export default function ChoresPage() {
           <h2 className="text-2xl font-bold text-gray-900">Weekly Chore Plan</h2>
           {weekLabel && <p className="text-sm text-gray-500 mt-0.5">{weekLabel}</p>}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {plan && (
             <button onClick={loadPlan} className="btn-secondary text-xs">🔄 Refresh</button>
           )}
           {plan && (
             <button onClick={handleDelete} className="text-xs px-3 py-2 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 transition-colors">
-              🗑️ Delete Plan
+              🗑️ <span className="hidden sm:inline">Delete Plan</span><span className="sm:hidden">Delete</span>
             </button>
           )}
-          <button onClick={handleGenerate} disabled={generating} className="btn-primary">
-            {generating ? '⏳ Generating…' : `🧹 ${plan ? 'Re-generate Chores' : 'Generate Chore Plan'}`}
+          <button onClick={handleGenerate} disabled={generating} className="btn-primary text-sm">
+            {generating ? '⏳ Generating…' : plan
+              ? <><span className="sm:hidden">🧹 Re-generate</span><span className="hidden sm:inline">🧹 Re-generate Chores</span></>
+              : '🧹 Generate Chore Plan'
+            }
           </button>
         </div>
       </div>

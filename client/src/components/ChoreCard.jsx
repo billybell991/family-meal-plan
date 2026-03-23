@@ -65,13 +65,14 @@ export default function ChoreCard({ dayData, onToggleComplete, onEditDay }) {
           {total === 0 ? (
             <span className="text-sm text-slate-400 italic">No chores assigned</span>
           ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-700">{total} chores</span>
-              <span className="text-xs text-slate-400">·</span>
-              <div className="flex gap-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-sm font-semibold text-slate-700 flex-shrink-0">{total} chores</span>
+              <span className="text-xs text-slate-400 flex-shrink-0">·</span>
+              <div className="flex gap-1 min-w-0 overflow-hidden">
                 {Object.keys(byPerson).map(name => (
-                  <span key={name} className={`text-xs px-1.5 py-0.5 rounded-full ${MEMBER_COLORS[name] || 'bg-slate-100 text-slate-600'}`}>
-                    {name}
+                  <span key={name} className={`text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ${MEMBER_COLORS[name] || 'bg-slate-100 text-slate-600'}`}>
+                    <span className="sm:hidden">{name[0]}</span>
+                    <span className="hidden sm:inline">{name}</span>
                   </span>
                 ))}
               </div>
