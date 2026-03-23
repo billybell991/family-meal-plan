@@ -19,7 +19,7 @@ const CATEGORY_ICONS = {
   cooking: '👨‍🍳',
 };
 
-export default function ChoreCard({ dayData, onToggleComplete }) {
+export default function ChoreCard({ dayData, onToggleComplete, onEditDay }) {
   const [expanded, setExpanded] = useState(false);
 
   const assignments = dayData.assignments || [];
@@ -84,6 +84,13 @@ export default function ChoreCard({ dayData, onToggleComplete }) {
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${allDone ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
               {completed}/{total}
             </span>
+          )}
+          {onEditDay && (
+            <button
+              onClick={e => { e.stopPropagation(); onEditDay(dayData); }}
+              className="text-xs px-2 py-1 rounded text-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+              title="Edit chore assignments"
+            >✏️</button>
           )}
           <span className="text-slate-300 text-xs">{expanded ? '▲' : '▼'}</span>
         </div>

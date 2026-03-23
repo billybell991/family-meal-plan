@@ -51,6 +51,8 @@ export const generateChorePlan = () => api.post('/chores/plan/generate');
 export const deleteChorePlan = () => api.delete('/chores/plan');
 export const toggleChoreComplete = (day, choreId, assignedTo, isCompleted) =>
   api.patch(`/chores/plan/day/${encodeURIComponent(day)}/complete`, { choreId, assignedTo, isCompleted });
+export const updateDayAssignments = (day, assignments) =>
+  api.patch(`/chores/plan/day/${encodeURIComponent(day)}/assignments`, { assignments });
 export const getChoreHistory = () => api.get('/chores/history');
 export const sendChoreNotificationEmail = () => api.post('/chores/send-notification');
 

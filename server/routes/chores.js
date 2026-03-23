@@ -160,6 +160,45 @@ router.delete('/plan', (req, res) => {
   }
 });
 
+// PATCH /api/chores/plan/day/:day/assignments — replace all assignments for a day
+router.patch('/plan/day/:day/assignments', (req, res) => {
+  try {
+    const { day } = req.params;
+    const { assignments } = req.body;
+    if (!Array.isArray(assignments)) return res.status(400).json({ error: 'assignments must be an array.' });
+
+    const plan = getCurrentChorePlan();
+    if (!plan) return res.status(404).json({ error: 'No chore plan found.' });
+
+    const dayEntry = plan.days.find(d => d.day === day);
+    if (!dayEntry) return res.status(404).json({ error: `Day "${day}" not found.` });
+
+    // Validate each assignment has required fields
+    for (const a of assignments) {
+      if (!a.choreId || !a.choreName || !a.assignedTo) {
+        return res.status(400).json({ error: 'Each assignment must have choreId, choreName, and assignedTo.' });
+      }
+    }
+
+    dayEntry.assignments = assignments.map(a => ({
+      choreId: a.choreId,
+      choreName: a.choreName,
+      category: a.category || 'other',
+      assignedTo: a.assignedTo,
+      isCompleted: !!a.isCompleted,
+      ...(a.completedAt ? { completedAt: a.completedAt } : {}),
+    }));
+
+    // Sort by person name
+    dayEntry.assignments.sort((a, b) => a.assignedTo.localeCompare(b.assignedTo));
+
+    writeChorePlanDirect(plan);
+    res.json(plan);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // PATCH /api/chores/plan/day/:day/complete — toggle chore completion
 router.patch('/plan/day/:day/complete', (req, res) => {
   try {

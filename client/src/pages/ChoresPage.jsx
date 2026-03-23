@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getChorePlan, generateChorePlan, deleteChorePlan, toggleChoreComplete, getChoreDefinitions, addChoreDefinition, updateChoreDefinition, deleteChoreDefinition } from '../api.js';
+import { getChorePlan, generateChorePlan, deleteChorePlan, toggleChoreComplete, getChoreDefinitions, addChoreDefinition, updateChoreDefinition, deleteChoreDefinition, updateDayAssignments } from '../api.js';
 import ChoreCard from '../components/ChoreCard.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import EditChoreModal from '../components/EditChoreModal.jsx';
+import EditDayChoresModal from '../components/EditDayChoresModal.jsx';
 
 const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const CATEGORIES = ['kitchen', 'floors', 'rooms', 'bathroom', 'laundry', 'garbage', 'pets', 'outdoor', 'cooking', 'other'];
@@ -32,6 +33,7 @@ export default function ChoresPage() {
   // Chore library state
   const [choreLibrary, setChoreLibrary] = useState([]);
   const [choreModal, setChoreModal] = useState({ open: false, chore: null });
+  const [editDayModal, setEditDayModal] = useState(null); // dayData or null
   const [libraryFilter, setLibraryFilter] = useState('all');
 
   const loadPlan = useCallback(async () => {
@@ -131,6 +133,17 @@ export default function ChoresPage() {
     }
   };
 
+  const handleSaveDayAssignments = async (day, assignments) => {
+    try {
+      const res = await updateDayAssignments(day, assignments);
+      setPlan(res.data);
+      setEditDayModal(null);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to save assignments.');
+      throw err;
+    }
+  };
+
   const filteredLibrary = libraryFilter === 'all'
     ? choreLibrary
     : choreLibrary.filter(c => c.category === libraryFilter);
@@ -224,6 +237,7 @@ export default function ChoresPage() {
                   key={dayData.day}
                   dayData={dayData}
                   onToggleComplete={handleToggleComplete}
+                  onEditDay={(d) => setEditDayModal(d)}
                 />
               ))}
             </div>
@@ -399,6 +413,16 @@ export default function ChoresPage() {
           chore={choreModal.chore}
           onClose={() => setChoreModal({ open: false, chore: null })}
           onSave={handleSaveChore}
+        />
+      )}
+
+      {/* Edit day assignments modal */}
+      {editDayModal && (
+        <EditDayChoresModal
+          dayData={editDayModal}
+          choreLibrary={choreLibrary}
+          onClose={() => setEditDayModal(null)}
+          onSave={handleSaveDayAssignments}
         />
       )}
     </div>
