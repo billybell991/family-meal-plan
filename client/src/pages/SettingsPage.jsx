@@ -262,10 +262,38 @@ export default function SettingsPage() {
         ))}
       </div>
 
+      {/* Member Emails */}
+      <div className="card p-6 space-y-4">
+        <h3 className="font-semibold text-gray-800 text-lg">👤 Daily Email — Per-Person Addresses</h3>
+        <p className="text-sm text-gray-500">
+          When the daily reminder sends, each person will receive <strong>only their own chores and meal info</strong>
+          (e.g. if they're cooking). Leave blank for anyone who doesn't want a daily email.
+        </p>
+        {FAMILY.map(member => {
+          const colors = { Mom: 'purple', Dad: 'blue', Maya: 'pink', Maddy: 'amber' };
+          const ring = { Mom: 'focus:ring-purple-400', Dad: 'focus:ring-blue-400', Maya: 'focus:ring-pink-400', Maddy: 'focus:ring-amber-400' };
+          return (
+            <div key={member} className="flex items-center gap-3">
+              <span className={`text-sm font-semibold w-14 text-${colors[member]}-600`}>{member}</span>
+              <input
+                type="email"
+                value={settings.memberEmails?.[member] ?? ''}
+                onChange={e => setSettings(s => ({
+                  ...s,
+                  memberEmails: { ...(s.memberEmails || {}), [member]: e.target.value },
+                }))}
+                className={`flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 ${ring[member]}`}
+                placeholder={`${member.toLowerCase()}@example.com`}
+              />
+            </div>
+          );
+        })}
+      </div>
+
       {/* Notification Emails */}
       <div className="card p-6 space-y-4">
         <h3 className="font-semibold text-gray-800 text-lg">📧 Weekly Email Notification</h3>
-        <p className="text-sm text-gray-500">When the plan is generated, a combined email with meals + chores (broken down by person) will be sent here.</p>
+        <p className="text-sm text-gray-500">When the plan is generated, a combined email with meals + chores (broken down by everyone) will be sent to these addresses.</p>
         {(settings.notificationEmails || []).map((email, i) => (
           <div key={i} className="flex gap-2 items-center">
             <input
@@ -312,7 +340,8 @@ export default function SettingsPage() {
       <div className="card p-6 space-y-4">
         <h3 className="font-semibold text-gray-800 text-lg">📋 Daily Email Reminder</h3>
         <p className="text-sm text-gray-500">
-          Get a daily email with just that day's supper and chore assignments — a quick "today's to-do" delivered to everyone's inbox.
+          Each day, everyone with an email above gets <strong>their own personalized reminder</strong> — just their chores
+          and whether they're cooking that night. If no per-person emails are set, the combined view goes to the weekly addresses instead.
         </p>
         <div className="flex items-center gap-3">
           <label className="relative inline-flex items-center cursor-pointer">
@@ -355,12 +384,12 @@ export default function SettingsPage() {
                 }
               }}
               className="btn-secondary text-sm"
-              disabled={!settings.notificationEmails?.length}
+              disabled={!Object.values(settings.memberEmails || {}).some(e => e?.trim()) && !settings.notificationEmails?.length}
             >📋 Send Today's Email Now</button>
           </>
         )}
-        {!settings.notificationEmails?.length && settings.dailyEmailEnabled && (
-          <p className="text-xs text-amber-600">⚠️ Add at least one email address above to receive daily emails.</p>
+        {!Object.values(settings.memberEmails || {}).some(e => e?.trim()) && !settings.notificationEmails?.length && settings.dailyEmailEnabled && (
+          <p className="text-xs text-amber-600">⚠️ Add at least one member email above (or a weekly notification email) to receive daily emails.</p>
         )}
       </div>
 

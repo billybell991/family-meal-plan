@@ -246,13 +246,87 @@ function buildDailyEmailHtml(dayMeal, dayChores, dayName) {
 </html>`;
 }
 
+function buildPersonalDailyEmailHtml(person, dayMeal, dayChores, dayName) {
+  const colors = MEMBER_COLORS[person] || { bg: '#f1f5f9', text: '#475569', accent: '#64748b' };
+  const assignments = dayChores?.assignments || [];
+  const myChores = assignments.filter(a => a.assignedTo === person && !a.choreName?.toLowerCase().includes('make supper'));
+  const isCooking = dayMeal && !dayMeal.isTakeout && !dayMeal.isLeftover && dayMeal.cook === person;
+
+  // ── Supper section ────────────────────────────────────────────────────────
+  let supperHtml;
+  if (!dayMeal) {
+    supperHtml = '<p style="font-size:14px;color:#94a3b8;font-style:italic;">No meal planned for today.</p>';
+  } else if (dayMeal.isTakeout) {
+    supperHtml = '<p style="font-size:15px;font-weight:500;color:#ea580c;">🥡 Takeout Night — no cooking!</p>';
+  } else if (dayMeal.isLeftover) {
+    supperHtml = '<p style="font-size:15px;font-weight:500;color:#16a34a;">♻️ Leftover Night — no cooking!</p>';
+  } else {
+    const mealName = dayMeal.meal?.link
+      ? `<a href="${dayMeal.meal.link}" style="color:#2563eb;text-decoration:none;font-weight:600;">${dayMeal.meal.name}</a>`
+      : `<span style="font-weight:600;color:#1e293b;">${dayMeal.meal?.name || '—'}</span>`;
+    const sides = (dayMeal.sides || []).map(s => s.name).join(', ');
+    const sidesHtml = sides ? `<br><span style="font-size:13px;color:#64748b;">+ ${sides}</span>` : '';
+    const cookColor = MEMBER_COLORS[dayMeal.cook] || { text: '#475569' };
+    const cookHtml = isCooking
+      ? `<p style="font-size:13px;margin:8px 0 0;"><strong style="color:${colors.text};">👨‍🍳 That's you cooking tonight!</strong></p>`
+      : dayMeal.cook
+        ? `<p style="font-size:13px;color:#475569;margin:6px 0 0;">👨‍🍳 Cook tonight: <span style="color:${cookColor.text};font-weight:600;">${dayMeal.cook}</span></p>`
+        : '';
+    supperHtml = `<p style="font-size:15px;margin:0;">${mealName}${sidesHtml}</p>${cookHtml}`;
+  }
+
+  // ── Tasks section ─────────────────────────────────────────────────────────
+  const hasTasks = isCooking || myChores.length > 0;
+  let tasksHtml;
+  if (!hasTasks) {
+    tasksHtml = '<p style="font-size:14px;color:#94a3b8;font-style:italic;">No chores assigned for today. Enjoy your day off! 🎉</p>';
+  } else {
+    const cookItem = isCooking
+      ? `<div style="background:#fff7ed;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #f59e0b;">
+          <span style="font-size:14px;color:#92400e;font-weight:600;">🍳 Make Supper — ${dayMeal.meal?.name || 'TBD'}</span>
+         </div>`
+      : '';
+    const choreItems = myChores.map(a =>
+      `<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #e2e8f0;">
+        <span style="font-size:14px;color:#475569;">📋 ${a.choreName}</span>
+       </div>`
+    ).join('');
+    tasksHtml = cookItem + choreItems;
+  }
+
+  return `<!DOCTYPE html>
+<html>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;padding:20px;margin:0;">
+  <div style="max-width:520px;margin:0 auto;">
+    <div style="background:linear-gradient(135deg,${colors.accent},${colors.text});padding:24px 28px;border-radius:12px 12px 0 0;">
+      <p style="margin:0 0 4px;color:rgba(255,255,255,0.75);font-size:13px;">Hey ${person}! Here's your day:</p>
+      <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">📋 ${dayName}'s Plan</h1>
+      <a href="${APP_URL}" style="display:inline-block;margin-top:12px;padding:8px 18px;background:rgba(255,255,255,0.2);color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;">📱 Open Planner App →</a>
+    </div>
+    <div style="background:#fff;border-radius:0 0 12px 12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+      <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;">
+        <h2 style="margin:0 0 10px;font-size:16px;color:#1e293b;">🍽️ Tonight's Supper</h2>
+        ${supperHtml}
+      </div>
+      <div style="padding:20px 24px;">
+        <h2 style="margin:0 0 12px;font-size:16px;color:#1e293b;">✅ Your Tasks for Today</h2>
+        ${tasksHtml}
+      </div>
+      ${hasTasks ? `
+      <div style="padding:14px 24px;background:#f0fdf4;border-top:1px solid #dcfce7;">
+        <p style="margin:0;font-size:12px;color:#166534;">✅ Mark chores done in the <a href="${APP_URL}" style="color:#2563eb;font-weight:600;">Planner App</a> → My Week → ${dayName}</p>
+      </div>` : ''}
+      <div style="padding:14px 24px;background:#f8fafc;text-align:center;border-top:1px solid #f1f5f9;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">Bell Family Planner — AI-powered by Gemini</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 async function sendDailyNotification(mealPlan, chorePlan, settings) {
   initSendGrid();
-  const recipients = settings.notificationEmails;
-
-  if (!recipients || recipients.length === 0) {
-    throw new Error('No notification email configured in Settings.');
-  }
 
   const fromEmail = process.env.SENDGRID_FROM_EMAIL;
   if (!fromEmail) throw new Error('SENDGRID_FROM_EMAIL not set. Add it as a Railway variable.');
@@ -262,6 +336,33 @@ async function sendDailyNotification(mealPlan, chorePlan, settings) {
 
   const dayMeal = (mealPlan?.days || []).find(d => d.day === todayName) || null;
   const dayChores = (chorePlan?.days || []).find(d => d.day === todayName) || null;
+
+  // ── Personalized per-person emails ───────────────────────────────────────
+  const memberEmails = settings.memberEmails || {};
+  const membersWithEmail = Object.entries(memberEmails).filter(([, email]) => email?.trim());
+
+  if (membersWithEmail.length > 0) {
+    const messages = membersWithEmail.map(([member, email]) => ({
+      to: email.trim(),
+      from: { email: fromEmail, name: 'Bell Family Planner' },
+      subject: `📋 Your Plan for ${todayName}`,
+      html: buildPersonalDailyEmailHtml(member, dayMeal, dayChores, todayName),
+    }));
+    try {
+      await sgMail.send(messages);
+      console.log(`[Notify] Personalized daily emails sent for ${todayName} to: ${membersWithEmail.map(([m, e]) => `${m}<${e}>`).join(', ')}`);
+    } catch (err) {
+      const body = err.response?.body;
+      throw new Error(body?.errors?.[0]?.message || err.message);
+    }
+    return;
+  }
+
+  // ── Fallback: combined email to notificationEmails ────────────────────────
+  const recipients = settings.notificationEmails || [];
+  if (recipients.length === 0) {
+    throw new Error('No notification emails configured in Settings. Add member emails or a notification email.');
+  }
 
   const htmlBody = buildDailyEmailHtml(dayMeal, dayChores, todayName);
   const messages = recipients.map(email => ({
@@ -273,7 +374,7 @@ async function sendDailyNotification(mealPlan, chorePlan, settings) {
 
   try {
     await sgMail.send(messages);
-    console.log(`[Notify] Daily email sent for ${todayName} to: ${recipients.join(', ')}`);
+    console.log(`[Notify] Daily email (combined) sent for ${todayName} to: ${recipients.join(', ')}`);
   } catch (err) {
     const body = err.response?.body;
     throw new Error(body?.errors?.[0]?.message || err.message);

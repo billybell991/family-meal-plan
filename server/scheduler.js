@@ -97,21 +97,27 @@ function init() {
   if (dailyTask) dailyTask.stop();
   dailyTask = null;
 
-  if (settings.dailyEmailEnabled && settings.notificationEmails?.length > 0) {
-    const dHour = settings.dailyEmailHour ?? 16;
-    const dMin = settings.dailyEmailMinute ?? 0;
-    const dailyCron = `${dMin} ${dHour} * * *`;
-    console.log(`[Scheduler] Scheduling daily email: ${dailyCron} (every day at ${String(dHour).padStart(2, '0')}:${String(dMin).padStart(2, '0')})`);
+  if (settings.dailyEmailEnabled) {
+    const hasMemberEmails = Object.values(settings.memberEmails || {}).some(e => e?.trim());
+    const hasRecipients = settings.notificationEmails?.length > 0;
+    if (!hasMemberEmails && !hasRecipients) {
+      console.log('[Scheduler] Daily email disabled — no member emails or notification emails configured.');
+    } else {
+      const dHour = settings.dailyEmailHour ?? 16;
+      const dMin = settings.dailyEmailMinute ?? 0;
+      const dailyCron = `${dMin} ${dHour} * * *`;
+      console.log(`[Scheduler] Scheduling daily email: ${dailyCron} (every day at ${String(dHour).padStart(2, '0')}:${String(dMin).padStart(2, '0')})`);
 
-    dailyTask = cron.schedule(dailyCron, () => {
-      const s = getSettings();
-      if (!s.dailyEmailEnabled) return;
-      const mealPlan = getCurrentPlan();
-      const chorePlan = getCurrentChorePlan();
-      sendDailyNotification(mealPlan, chorePlan, s).catch(err =>
-        console.error('[Notify] Daily email failed:', err.message)
-      );
-    });
+      dailyTask = cron.schedule(dailyCron, () => {
+        const s = getSettings();
+        if (!s.dailyEmailEnabled) return;
+        const mealPlan = getCurrentPlan();
+        const chorePlan = getCurrentChorePlan();
+        sendDailyNotification(mealPlan, chorePlan, s).catch(err =>
+          console.error('[Notify] Daily email failed:', err.message)
+        );
+      });
+    }
   } else {
     console.log('[Scheduler] Daily email disabled or no recipients configured.');
   }

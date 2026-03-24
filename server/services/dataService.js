@@ -143,6 +143,11 @@ const DEFAULT_SETTINGS = {
   scheduleMinute: 0,
   takeoutDay: 'Wednesday',
   defaultPortions: 4,
+  dailyEmailEnabled: false,
+  dailyEmailHour: 16,
+  dailyEmailMinute: 0,
+  notificationEmails: [],
+  memberEmails: { Mom: '', Dad: '', Maya: '', Maddy: '' },
 };
 
 function getSettings() {
