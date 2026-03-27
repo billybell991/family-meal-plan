@@ -381,8 +381,45 @@ async function sendDailyNotification(mealPlan, chorePlan, settings) {
   }
 }
 
+// ── Send daily notification for a specific subset of members ─────────────────
+// Used by the scheduler when different members have different send times.
+async function sendDailyNotificationForMembers(memberNames, mealPlan, chorePlan, settings) {
+  initSendGrid();
+
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL;
+  if (!fromEmail) throw new Error('SENDGRID_FROM_EMAIL not set. Add it as a Railway variable.');
+
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const todayName = dayNames[new Date().getDay()];
+
+  const dayMeal = (mealPlan?.days || []).find(d => d.day === todayName) || null;
+  const dayChores = (chorePlan?.days || []).find(d => d.day === todayName) || null;
+
+  const memberEmails = settings.memberEmails || {};
+  const targets = memberNames
+    .map(name => [name, memberEmails[name]])
+    .filter(([, email]) => email?.trim());
+
+  if (targets.length === 0) return;
+
+  const messages = targets.map(([member, email]) => ({
+    to: email.trim(),
+    from: { email: fromEmail, name: 'Bell Family Planner' },
+    subject: `📋 Your Plan for ${todayName}`,
+    html: buildPersonalDailyEmailHtml(member, dayMeal, dayChores, todayName),
+  }));
+
+  try {
+    await sgMail.send(messages);
+    console.log(`[Notify] Personalized daily emails sent for ${todayName} to: ${targets.map(([m, e]) => `${m}<${e}>`).join(', ')}`);
+  } catch (err) {
+    const body = err.response?.body;
+    throw new Error(body?.errors?.[0]?.message || err.message);
+  }
+}
+
 // Legacy exports for scheduler compatibility
 const sendMealPlanNotification = async (plan, settings) => sendWeeklyNotification(plan, null, settings);
 const sendChorePlanNotification = async (plan, settings) => sendWeeklyNotification(null, plan, settings);
 
-module.exports = { sendWeeklyNotification, sendDailyNotification, sendMealPlanNotification, sendChorePlanNotification };
+module.exports = { sendWeeklyNotification, sendDailyNotification, sendDailyNotificationForMembers, sendMealPlanNotification, sendChorePlanNotification };

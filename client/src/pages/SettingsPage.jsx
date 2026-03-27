@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const FAMILY = ['Mom', 'Dad', 'Maya', 'Maddy'];
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const MINUTES = [0, 15, 30, 45];
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(null);
@@ -264,30 +265,64 @@ export default function SettingsPage() {
 
       {/* Member Emails */}
       <div className="card p-6 space-y-4">
-        <h3 className="font-semibold text-gray-800 text-lg">👤 Daily Email — Per-Person Addresses</h3>
+        <h3 className="font-semibold text-gray-800 text-lg">👤 Daily Email — Per-Person Settings</h3>
         <p className="text-sm text-gray-500">
-          When the daily reminder sends, each person will receive <strong>only their own chores and meal info</strong>
-          (e.g. if they're cooking). Leave blank for anyone who doesn't want a daily email.
+          Each person gets <strong>only their own chores and meal info</strong>. Set a personal send time per person —
+          leave blank to use the default time below. Leave the email blank for anyone who doesn't want a daily email.
         </p>
-        {FAMILY.map(member => {
-          const colors = { Mom: 'purple', Dad: 'blue', Maya: 'pink', Maddy: 'amber' };
-          const ring = { Mom: 'focus:ring-purple-400', Dad: 'focus:ring-blue-400', Maya: 'focus:ring-pink-400', Maddy: 'focus:ring-amber-400' };
-          return (
-            <div key={member} className="flex items-center gap-3">
-              <span className={`text-sm font-semibold w-14 text-${colors[member]}-600`}>{member}</span>
-              <input
-                type="email"
-                value={settings.memberEmails?.[member] ?? ''}
-                onChange={e => setSettings(s => ({
-                  ...s,
-                  memberEmails: { ...(s.memberEmails || {}), [member]: e.target.value },
-                }))}
-                className={`flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 ${ring[member]}`}
-                placeholder={`${member.toLowerCase()}@example.com`}
-              />
-            </div>
-          );
-        })}
+        <div className="grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-3 items-center">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Person</span>
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Email address</span>
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Send at</span>
+          {FAMILY.map(member => {
+            const colors = { Mom: 'purple', Dad: 'blue', Maya: 'pink', Maddy: 'amber' };
+            const ring = { Mom: 'focus:ring-purple-400', Dad: 'focus:ring-blue-400', Maya: 'focus:ring-pink-400', Maddy: 'focus:ring-amber-400' };
+            const memberHour = settings.memberEmailHours?.[member] ?? settings.dailyEmailHour ?? 16;
+            const memberMinute = settings.memberEmailMinutes?.[member] ?? settings.dailyEmailMinute ?? 0;
+            return (
+              <React.Fragment key={member}>
+                <span className={`text-sm font-semibold text-${colors[member]}-600`}>{member}</span>
+                <input
+                  type="email"
+                  value={settings.memberEmails?.[member] ?? ''}
+                  onChange={e => setSettings(s => ({
+                    ...s,
+                    memberEmails: { ...(s.memberEmails || {}), [member]: e.target.value },
+                  }))}
+                  className={`rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 ${ring[member]}`}
+                  placeholder={`${member.toLowerCase()}@example.com`}
+                />
+                <div className="flex items-center gap-1">
+                  <select
+                    value={memberHour}
+                    onChange={e => setSettings(s => ({
+                      ...s,
+                      memberEmailHours: { ...(s.memberEmailHours || {}), [member]: Number(e.target.value) },
+                    }))}
+                    className={`rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 ${ring[member]}`}
+                  >
+                    {HOURS.map(h => (
+                      <option key={h} value={h}>{String(h % 12 === 0 ? 12 : h % 12).padStart(2, '0')} {h < 12 ? 'AM' : 'PM'}</option>
+                    ))}
+                  </select>
+                  <span className="text-gray-400 text-sm">:</span>
+                  <select
+                    value={memberMinute}
+                    onChange={e => setSettings(s => ({
+                      ...s,
+                      memberEmailMinutes: { ...(s.memberEmailMinutes || {}), [member]: Number(e.target.value) },
+                    }))}
+                    className={`rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 ${ring[member]}`}
+                  >
+                    {MINUTES.map(m => (
+                      <option key={m} value={m}>{String(m).padStart(2, '0')}</option>
+                    ))}
+                  </select>
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
       </div>
 
       {/* Notification Emails */}
@@ -340,8 +375,9 @@ export default function SettingsPage() {
       <div className="card p-6 space-y-4">
         <h3 className="font-semibold text-gray-800 text-lg">📋 Daily Email Reminder</h3>
         <p className="text-sm text-gray-500">
-          Each day, everyone with an email above gets <strong>their own personalized reminder</strong> — just their chores
-          and whether they're cooking that night. If no per-person emails are set, the combined view goes to the weekly addresses instead.
+          Enable personalized daily reminders. Each person's email fires at <strong>their own time</strong> set above.
+          The time below is the <strong>default</strong> used for anyone without a custom time, and for the combined
+          fallback email if no per-person addresses are set.
         </p>
         <div className="flex items-center gap-3">
           <label className="relative inline-flex items-center cursor-pointer">
@@ -360,7 +396,7 @@ export default function SettingsPage() {
         {settings.dailyEmailEnabled && (
           <>
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-gray-700">Send at</label>
+              <label className="text-sm font-medium text-gray-700">Default time</label>
               <select
                 value={settings.dailyEmailHour ?? 16}
                 onChange={e => setSettings(s => ({ ...s, dailyEmailHour: Number(e.target.value) }))}
@@ -368,8 +404,17 @@ export default function SettingsPage() {
               >
                 {HOURS.map(h => (
                   <option key={h} value={h}>
-                    {String(h).padStart(2, '0')}:00 {h < 12 ? 'AM' : h === 12 ? 'PM' : 'PM'}
+                    {String(h % 12 === 0 ? 12 : h % 12).padStart(2, '0')}:{String(settings.dailyEmailMinute ?? 0).padStart(2, '0')} {h < 12 ? 'AM' : 'PM'}
                   </option>
+                ))}
+              </select>
+              <select
+                value={settings.dailyEmailMinute ?? 0}
+                onChange={e => setSettings(s => ({ ...s, dailyEmailMinute: Number(e.target.value) }))}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+              >
+                {MINUTES.map(m => (
+                  <option key={m} value={m}>{String(m).padStart(2, '0')}</option>
                 ))}
               </select>
               <span className="text-xs text-gray-400">every day</span>

@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const { generateWeeklyPlan } = require('./services/geminiService');
 const { generateWeeklyChores } = require('./services/choreService');
 const { getRandomSundayCandidates } = require('./services/recipeService');
-const { sendWeeklyNotification, sendDailyNotification } = require('./services/notificationService');
+const { sendWeeklyNotification, sendDailyNotification, sendDailyNotificationForMembers } = require('./services/notificationService');
 const {
   savePlan,
   getSettings,
@@ -17,7 +17,7 @@ const {
 } = require('./services/dataService');
 
 let scheduledTask = null;
-let dailyTask = null;
+let dailyTasks = [];
 
 function buildCronExpression(settings) {
   // e.g. Saturday at 12:00 → "0 12 * * 6"
@@ -87,39 +87,73 @@ function init() {
   const cronExpr = buildCronExpression(settings);
   console.log(`[Scheduler] Scheduling meal plan generation: ${cronExpr} (${settings.scheduleDay} at ${settings.scheduleHour}:${String(settings.scheduleMinute).padStart(2, '0')})`);
 
-  if (scheduledTask) scheduledTask.stop();
+  if (scheduledTask) scheduledTask.destroy();
 
   scheduledTask = cron.schedule(cronExpr, () => {
     runGeneration().catch(err => console.error('[Scheduler] Cron error:', err));
   });
 
-  // ── Daily email cron ──────────────────────────────────────────────────────
-  if (dailyTask) dailyTask.stop();
-  dailyTask = null;
+  // ── Daily email cron(s) — one per unique send time ────────────────────────
+  dailyTasks.forEach(t => t.destroy());
+  dailyTasks = [];
 
   if (settings.dailyEmailEnabled) {
-    const hasMemberEmails = Object.values(settings.memberEmails || {}).some(e => e?.trim());
-    const hasRecipients = settings.notificationEmails?.length > 0;
-    if (!hasMemberEmails && !hasRecipients) {
-      console.log('[Scheduler] Daily email disabled — no member emails or notification emails configured.');
-    } else {
-      const dHour = settings.dailyEmailHour ?? 16;
-      const dMin = settings.dailyEmailMinute ?? 0;
-      const dailyCron = `${dMin} ${dHour} * * *`;
-      console.log(`[Scheduler] Scheduling daily email: ${dailyCron} (every day at ${String(dHour).padStart(2, '0')}:${String(dMin).padStart(2, '0')})`);
+    const memberEmails = settings.memberEmails || {};
+    const memberEmailHours = settings.memberEmailHours || {};
+    const memberEmailMinutes = settings.memberEmailMinutes || {};
+    const defaultHour = settings.dailyEmailHour ?? 16;
+    const defaultMinute = settings.dailyEmailMinute ?? 0;
 
-      dailyTask = cron.schedule(dailyCron, () => {
-        const s = getSettings();
-        if (!s.dailyEmailEnabled) return;
-        const mealPlan = getCurrentPlan();
-        const chorePlan = getCurrentChorePlan();
-        sendDailyNotification(mealPlan, chorePlan, s).catch(err =>
-          console.error('[Notify] Daily email failed:', err.message)
-        );
-      });
+    // Group members-with-emails by their send time
+    const timeGroups = {}; // "H:M" -> { hour, minute, members[] }
+    for (const [member, email] of Object.entries(memberEmails)) {
+      if (!email?.trim()) continue;
+      const h = memberEmailHours[member] ?? defaultHour;
+      const m = memberEmailMinutes[member] ?? defaultMinute;
+      const key = `${h}:${m}`;
+      if (!timeGroups[key]) timeGroups[key] = { hour: h, minute: m, members: [] };
+      timeGroups[key].members.push(member);
+    }
+
+    const groups = Object.values(timeGroups);
+
+    if (groups.length > 0) {
+      for (const { hour, minute, members } of groups) {
+        const cronExpr = `${minute} ${hour} * * *`;
+        console.log(`[Scheduler] Daily email for [${members.join(', ')}] at ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} → ${cronExpr}`);
+        const task = cron.schedule(cronExpr, () => {
+          const s = getSettings();
+          if (!s.dailyEmailEnabled) return;
+          const mealPlan = getCurrentPlan();
+          const chorePlan = getCurrentChorePlan();
+          sendDailyNotificationForMembers(members, mealPlan, chorePlan, s).catch(err =>
+            console.error('[Notify] Daily email failed:', err.message)
+          );
+        });
+        dailyTasks.push(task);
+      }
+    } else {
+      // No per-person emails — fall back to combined email at global time
+      const hasRecipients = settings.notificationEmails?.length > 0;
+      if (!hasRecipients) {
+        console.log('[Scheduler] Daily email disabled — no member emails or notification emails configured.');
+      } else {
+        const cronExpr = `${defaultMinute} ${defaultHour} * * *`;
+        console.log(`[Scheduler] Scheduling daily email (combined fallback): ${cronExpr}`);
+        const task = cron.schedule(cronExpr, () => {
+          const s = getSettings();
+          if (!s.dailyEmailEnabled) return;
+          const mealPlan = getCurrentPlan();
+          const chorePlan = getCurrentChorePlan();
+          sendDailyNotification(mealPlan, chorePlan, s).catch(err =>
+            console.error('[Notify] Daily email failed:', err.message)
+          );
+        });
+        dailyTasks.push(task);
+      }
     }
   } else {
-    console.log('[Scheduler] Daily email disabled or no recipients configured.');
+    console.log('[Scheduler] Daily email disabled.');
   }
 }
 

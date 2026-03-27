@@ -30,5 +30,23 @@
   "dailyEmailEnabled": true,
   "dailyEmailHour": 16,
   "dailyEmailMinute": 0,
-  "notificationEmails": []
+  "notificationEmails": [],
+  "memberEmails": {
+    "Mom": "",
+    "Dad": "",
+    "Maya": "",
+    "Maddy": ""
+  },
+  "memberEmailHours": {
+    "Mom": 16,
+    "Dad": 16,
+    "Maya": 16,
+    "Maddy": 16
+  },
+  "memberEmailMinutes": {
+    "Mom": 0,
+    "Dad": 0,
+    "Maya": 0,
+    "Maddy": 0
+  }
 }
