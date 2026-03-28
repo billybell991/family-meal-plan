@@ -91,7 +91,7 @@ function init() {
 
   scheduledTask = cron.schedule(cronExpr, () => {
     runGeneration().catch(err => console.error('[Scheduler] Cron error:', err));
-  });
+  }, { timezone: 'America/Toronto' });
 
   // ── Daily email cron(s) — one per unique send time ────────────────────────
   dailyTasks.forEach(t => t.destroy());
@@ -129,7 +129,7 @@ function init() {
           sendDailyNotificationForMembers(members, mealPlan, chorePlan, s).catch(err =>
             console.error('[Notify] Daily email failed:', err.message)
           );
-        });
+        }, { timezone: 'America/Toronto' });
         dailyTasks.push(task);
       }
     } else {
@@ -148,7 +148,7 @@ function init() {
           sendDailyNotification(mealPlan, chorePlan, s).catch(err =>
             console.error('[Notify] Daily email failed:', err.message)
           );
-        });
+        }, { timezone: 'America/Toronto' });
         dailyTasks.push(task);
       }
     }
