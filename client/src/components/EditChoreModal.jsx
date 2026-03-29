@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 const CATEGORIES = ['kitchen', 'floors', 'rooms', 'bathroom', 'laundry', 'garbage', 'pets', 'outdoor', 'cooking', 'other'];
 const DIFFICULTIES = ['easy', 'medium', 'hard'];
 const FREQUENCIES = ['daily', 'weekly', 'biweekly', 'monthly'];
+const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const CATEGORY_ICONS = {
   kitchen: '🍽️', floors: '🧹', rooms: '🛋️', bathroom: '🚿', laundry: '👕',
   garbage: '🗑️', pets: '🐾', outdoor: '🌿', cooking: '👨‍🍳', other: '📋',
@@ -11,6 +12,7 @@ const CATEGORY_ICONS = {
 const DEFAULT_FORM = {
   name: '', category: 'rooms', difficulty: 'easy',
   estimatedMinutes: 15, frequency: 'weekly', ageMin: 10,
+  specificDay: null,
 };
 
 export default function EditChoreModal({ chore, onClose, onSave }) {
@@ -147,6 +149,39 @@ export default function EditChoreModal({ chore, onClose, onSave }) {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Specific Day */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Specific Day <span className="text-gray-400 font-normal">(optional)</span></label>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setForm(f => ({ ...f, specificDay: null }))}
+                className={`px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                  form.specificDay === null
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                Any
+              </button>
+              {DAYS_OF_WEEK.map(d => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, specificDay: d }))}
+                  className={`px-2 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                    form.specificDay === d
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {d.slice(0, 3)}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1">Pin this chore to a specific day of the week</p>
           </div>
 
           {/* Est. Minutes + Min Age */}

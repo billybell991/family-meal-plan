@@ -380,6 +380,11 @@ export default function ChoresPage() {
                               {chore.ageMin}+
                             </span>
                           )}
+                          {chore.specificDay && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600 font-medium">
+                              📌 {chore.specificDay.slice(0, 3)}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">

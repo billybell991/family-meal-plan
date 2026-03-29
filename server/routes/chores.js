@@ -33,7 +33,7 @@ router.put('/definitions', (req, res) => {
 // POST /api/chores/definitions/chore — add a single chore to the library
 router.post('/definitions/chore', (req, res) => {
   try {
-    const { name, category, difficulty, estimatedMinutes, frequency, ageMin } = req.body;
+    const { name, category, difficulty, estimatedMinutes, frequency, ageMin, specificDay } = req.body;
     if (!name || !name.trim()) return res.status(400).json({ error: 'Chore name is required.' });
     const data = getChoreDefinitions();
     const id = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -48,6 +48,7 @@ router.post('/definitions/chore', (req, res) => {
       estimatedMinutes: Number(estimatedMinutes) || 15,
       frequency: frequency || 'weekly',
       ageMin: Number(ageMin) || 10,
+      ...(specificDay ? { specificDay } : {}),
     };
     data.choreDefinitions.push(chore);
     saveChoreDefinitions(data);
@@ -64,13 +65,20 @@ router.put('/definitions/chore/:id', (req, res) => {
     const data = getChoreDefinitions();
     const idx = data.choreDefinitions.findIndex(c => c.id === id);
     if (idx === -1) return res.status(404).json({ error: 'Chore not found.' });
-    const { name, category, difficulty, estimatedMinutes, frequency, ageMin } = req.body;
+    const { name, category, difficulty, estimatedMinutes, frequency, ageMin, specificDay } = req.body;
     if (name !== undefined) data.choreDefinitions[idx].name = name.trim();
     if (category !== undefined) data.choreDefinitions[idx].category = category;
     if (difficulty !== undefined) data.choreDefinitions[idx].difficulty = difficulty;
     if (estimatedMinutes !== undefined) data.choreDefinitions[idx].estimatedMinutes = Number(estimatedMinutes);
     if (frequency !== undefined) data.choreDefinitions[idx].frequency = frequency;
     if (ageMin !== undefined) data.choreDefinitions[idx].ageMin = Number(ageMin);
+    if (specificDay !== undefined) {
+      if (specificDay) {
+        data.choreDefinitions[idx].specificDay = specificDay;
+      } else {
+        delete data.choreDefinitions[idx].specificDay;
+      }
+    }
     saveChoreDefinitions(data);
     res.json(data.choreDefinitions[idx]);
   } catch (err) {

@@ -8,9 +8,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 async function generateWeeklyChores({ choreDefinitions = [], familyMembers = [], preferences = {}, recentAssignments = [], notes = {} }) {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-  const choreList = choreDefinitions.map(c =>
-    `- ${c.name} (id: ${c.id}, category: ${c.category}, difficulty: ${c.difficulty}, ~${c.estimatedMinutes}min, frequency: ${c.frequency}, min age: ${c.ageMin})`
-  ).join('\n');
+  const choreList = choreDefinitions.map(c => {
+    const dayNote = c.specificDay ? `, MUST be on: ${c.specificDay}` : '';
+    return `- ${c.name} (id: ${c.id}, category: ${c.category}, difficulty: ${c.difficulty}, ~${c.estimatedMinutes}min, frequency: ${c.frequency}, min age: ${c.ageMin}${dayNote})`;
+  }).join('\n');
 
   const memberList = familyMembers.map(m =>
     `- ${m.name} (age: ${m.age || 'adult'}, isAdult: ${m.isAdult})`
@@ -57,6 +58,7 @@ RULES:
 7. Respect preferences when provided.
 8. Each person should have 2-4 chores per day. Weekdays lighter, weekends heavier.
 9. Do NOT include every chore every week. Pick a reasonable subset — a typical family doesn't do all 39 chores weekly.
+10. If a chore says "MUST be on: <Day>", it MUST ONLY appear on that specific day. Never schedule it on any other day.
 
 RESPONSE FORMAT: Return ONLY valid JSON. No markdown, no explanation.
 {
