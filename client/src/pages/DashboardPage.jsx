@@ -55,12 +55,7 @@ export default function DashboardPage() {
       const chore = chorePlan?.days?.find(d => d.day === dayName) || null;
       return { day: dayName, meal, chore };
     });
-    // Pin today to top, keep rest in order
-    const todayIdx = all.findIndex(d => d.meal?.date === TODAY_DATE);
-    if (todayIdx > 0) {
-      const [todayItem] = all.splice(todayIdx, 1);
-      all.unshift(todayItem);
-    }
+    // Rotate so the week starts from the weekOf date (Sunday) — no reordering
     return all;
   })();
 
