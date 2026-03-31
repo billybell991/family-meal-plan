@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions } from '../api.js';
+import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions, getVapidPublicKey, subscribePush, unsubscribePush, sendTestPush } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -22,6 +22,9 @@ export default function SettingsPage() {
   const [choreData, setChoreData] = useState(null);
   const [chorePrefText, setChorePrefText] = useState({});
   const [choreDislikeText, setChoreDislikeText] = useState({});
+  const [pushSupported, setPushSupported] = useState(false);
+  const [pushActive, setPushActive] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
 
   useEffect(() => {
     Promise.all([getSettings(), getKnownMeals(), getChoreDefinitions()])
@@ -44,6 +47,18 @@ export default function SettingsPage() {
         setChoreDislikeText(dislikes);
       })
       .finally(() => setLoading(false));
+
+    // Check push notification support
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setPushSupported(true);
+      navigator.serviceWorker.getRegistration('/sw-push.js').then(reg => {
+        if (reg) {
+          reg.pushManager.getSubscription().then(sub => {
+            setPushActive(!!sub);
+          });
+        }
+      });
+    }
   }, []);
 
   const handleSave = async () => {
@@ -113,7 +128,65 @@ export default function SettingsPage() {
     }
   };
 
+  const handleEnablePush = async () => {
+    setPushLoading(true);
+    try {
+      const { data } = await getVapidPublicKey();
+      const reg = await navigator.serviceWorker.register('/sw-push.js');
+      await navigator.serviceWorker.ready;
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(data.publicKey),
+      });
+      await subscribePush(subscription.toJSON());
+      setPushActive(true);
+    } catch (err) {
+      console.error('Push subscribe failed:', err);
+      if (Notification.permission === 'denied') {
+        alert('Notifications are blocked. Please enable them in your browser settings.');
+      } else {
+        alert('Failed to enable push notifications: ' + err.message);
+      }
+    } finally {
+      setPushLoading(false);
+    }
+  };
+
+  const handleDisablePush = async () => {
+    setPushLoading(true);
+    try {
+      const reg = await navigator.serviceWorker.getRegistration('/sw-push.js');
+      if (reg) {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await unsubscribePush(sub.endpoint);
+          await sub.unsubscribe();
+        }
+      }
+      setPushActive(false);
+    } catch (err) {
+      console.error('Push unsubscribe failed:', err);
+    } finally {
+      setPushLoading(false);
+    }
+  };
+
+  const handleTestPush = async () => {
+    try {
+      await sendTestPush();
+    } catch (e) {
+      alert(e.response?.data?.error || 'Failed to send test push.');
+    }
+  };
+
   if (loading) return <LoadingSpinner message="Loading settings…" />;
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -435,6 +508,52 @@ export default function SettingsPage() {
         )}
         {!Object.values(settings.memberEmails || {}).some(e => e?.trim()) && !settings.notificationEmails?.length && settings.dailyEmailEnabled && (
           <p className="text-xs text-amber-600">⚠️ Add at least one member email above (or a weekly notification email) to receive daily emails.</p>
+        )}
+      </div>
+
+      {/* Push Notifications */}
+      <div className="card p-6 space-y-4">
+        <h3 className="font-semibold text-gray-800 text-lg">🔔 Push Notifications</h3>
+        <p className="text-sm text-gray-500">
+          Get nudges on your phone for new weekly plans, daily meal reminders, and chore updates.
+        </p>
+        {!pushSupported ? (
+          <p className="text-sm text-gray-400">Push notifications are not supported in this browser.</p>
+        ) : (
+          <>
+            <button
+              onClick={pushActive ? handleDisablePush : handleEnablePush}
+              disabled={pushLoading}
+              className={`w-full py-3 rounded-xl font-semibold text-white transition-colors ${
+                pushActive
+                  ? 'bg-gray-400 hover:bg-gray-500'
+                  : 'bg-brand-500 hover:bg-brand-600'
+              }`}
+            >
+              {pushLoading ? 'Working…' : pushActive ? '🔕 Disable Notifications' : '🔔 Enable Notifications'}
+            </button>
+            {pushActive && (
+              <button
+                onClick={handleTestPush}
+                className="w-full py-3 rounded-xl font-semibold border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                📲 Send Test Ping
+              </button>
+            )}
+            {pushActive && (
+              <p className="text-sm text-green-600 text-center">✅ Notifications active</p>
+            )}
+            <div className="bg-brand-50 rounded-xl p-4 space-y-2">
+              <p className="font-semibold text-gray-800">📲 Install on your phone</p>
+              <p className="text-sm text-gray-600">For the best experience and push notifications to work:</p>
+              <ol className="text-sm text-gray-600 list-decimal list-inside space-y-1">
+                <li>Open this URL in Chrome on your Android</li>
+                <li>Tap the 3-dot menu (⋮)</li>
+                <li>Tap "Add to Home screen"</li>
+                <li>Done — it'll work like a real app</li>
+              </ol>
+            </div>
+          </>
         )}
       </div>
 

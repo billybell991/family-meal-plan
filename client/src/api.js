@@ -57,3 +57,9 @@ export const getChoreHistory = () => api.get('/chores/history');
 export const sendChoreNotificationEmail = () => api.post('/chores/send-notification');
 
 export const getRecipes = () => api.get('/recipes');
+
+// Push notifications
+export const getVapidPublicKey = () => api.get('/push/vapid-public-key');
+export const subscribePush = (subscription) => api.post('/push/subscribe', subscription);
+export const unsubscribePush = (endpoint) => api.post('/push/unsubscribe', { endpoint });
+export const sendTestPush = () => api.post('/push/test');

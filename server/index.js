@@ -8,6 +8,7 @@ const groceryRoutes = require('./routes/grocery');
 const settingsRoutes = require('./routes/settings');
 const recipesRoutes = require('./routes/recipes');
 const choreRoutes = require('./routes/chores');
+const pushRoutes = require('./routes/push');
 const scheduler = require('./scheduler');
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/grocery', groceryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/recipes', recipesRoutes);
 app.use('/api/chores', choreRoutes);
+app.use('/api/push', pushRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -3,6 +3,7 @@ const { generateWeeklyPlan } = require('./services/geminiService');
 const { generateWeeklyChores } = require('./services/choreService');
 const { getRandomSundayCandidates } = require('./services/recipeService');
 const { sendWeeklyNotification, sendDailyNotification, sendDailyNotificationForMembers } = require('./services/notificationService');
+const { sendPushToAll } = require('./services/pushService');
 const {
   savePlan,
   getSettings,
@@ -73,6 +74,14 @@ async function runGeneration() {
     sendWeeklyNotification(plan, chorePlan, settings).catch(err =>
       console.error('[Notify] Weekly email failed:', err.message)
     );
+
+    // Push notification for new plan
+    sendPushToAll(
+      '📋 New Weekly Plan!',
+      'Your meal plan and chore assignments for this week are ready.',
+      { url: '/', tag: 'weekly-plan' }
+    ).catch(err => console.error('[Notify] Weekly push failed:', err.message));
+
     return plan;
   } catch (err) {
     console.error('[Scheduler] Failed to generate meal plan:', err.message);
@@ -129,6 +138,11 @@ function init() {
           sendDailyNotificationForMembers(members, mealPlan, chorePlan, s).catch(err =>
             console.error('[Notify] Daily email failed:', err.message)
           );
+          sendPushToAll(
+            '🍽️ Today\'s Plan',
+            'Check today\'s meals and chores!',
+            { url: '/', tag: 'daily-plan' }
+          ).catch(err => console.error('[Notify] Daily push failed:', err.message));
         }, { timezone: 'America/Toronto' });
         dailyTasks.push(task);
       }
@@ -148,6 +162,11 @@ function init() {
           sendDailyNotification(mealPlan, chorePlan, s).catch(err =>
             console.error('[Notify] Daily email failed:', err.message)
           );
+          sendPushToAll(
+            '🍽️ Today\'s Plan',
+            'Check today\'s meals and chores!',
+            { url: '/', tag: 'daily-plan' }
+          ).catch(err => console.error('[Notify] Daily push failed:', err.message));
         }, { timezone: 'America/Toronto' });
         dailyTasks.push(task);
       }
