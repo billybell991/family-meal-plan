@@ -45,7 +45,27 @@ export default function EditDayChoresModal({ dayData, choreLibrary, onClose, onS
   const [choreSearch, setChoreSearch] = useState('');
   const [dropOpen, setDropOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const dropRef = useRef(null);
+  const pickerRef = useRef(null);
+
+  // Track visual viewport for virtual keyboard
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => setViewportHeight(vv.height);
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
+
+  // Scroll picker into view when dropdown opens
+  useEffect(() => {
+    if (dropOpen && pickerRef.current) {
+      setTimeout(() => {
+        pickerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  }, [dropOpen]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -111,7 +131,7 @@ export default function EditDayChoresModal({ dayData, choreLibrary, onClose, onS
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col" style={{ maxHeight: `${Math.min(viewportHeight * 0.9, window.innerHeight * 0.9)}px` }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
@@ -160,7 +180,7 @@ export default function EditDayChoresModal({ dayData, choreLibrary, onClose, onS
           ))}
 
           {/* Add chore row */}
-          <div className="border-t border-gray-100 pt-3 space-y-2">
+          <div ref={pickerRef} className="border-t border-gray-100 pt-3 space-y-2">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Add a chore</p>
 
             {/* Chore picker dropdown */}
@@ -186,6 +206,11 @@ export default function EditDayChoresModal({ dayData, choreLibrary, onClose, onS
                       type="text"
                       value={choreSearch}
                       onChange={e => setChoreSearch(e.target.value)}
+                      onFocus={() => {
+                        setTimeout(() => {
+                          pickerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
+                      }}
                       placeholder="Search chores…"
                       className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />

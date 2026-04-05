@@ -5,3 +5,5 @@ server/public/
 data/*.json
 !data/seed/*.json
 !data/.gitkeep
+playwright-report/
+test-results/

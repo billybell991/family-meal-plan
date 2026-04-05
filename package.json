@@ -8,7 +8,14 @@
     "start": "node server/index.js",
     "dev:server": "node --watch server/index.js",
     "dev:client": "cd client && npm run dev",
-    "postinstall": "cd server && npm install && cd ../client && npm install"
+    "postinstall": "cd server && npm install && cd ../client && npm install",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test --project=headless",
+    "test:e2e:visual": "playwright test --project=visual",
+    "test:e2e:regression": "playwright test --project=regression",
+    "test:e2e:headed": "playwright test --project=headless --headed",
+    "test:qa": "vitest run && playwright test --project=headless && playwright test --project=regression && playwright test --project=visual"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +24,9 @@
   "dependencies": {
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "vitest": "^4.1.2"
   }
 }
