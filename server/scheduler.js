@@ -20,6 +20,24 @@ const {
 let scheduledTask = null;
 let dailyTasks = [];
 
+async function retryWithBackoff(fn, { maxRetries = 5, baseDelay = 30000, label = 'operation' } = {}) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const status = err.status || err.statusCode;
+      const isRetryable = status === 503 || status === 429 || status === 500;
+      if (!isRetryable || attempt === maxRetries) {
+        console.error(`[Retry] ${label} failed after ${attempt} attempt(s): ${err.message}`);
+        throw err;
+      }
+      const delay = baseDelay * Math.pow(2, attempt - 1); // 30s, 60s, 120s, 240s, 480s
+      console.warn(`[Retry] ${label} attempt ${attempt}/${maxRetries} failed (${status}). Retrying in ${delay / 1000}s...`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+}
+
 function buildCronExpression(settings) {
   // e.g. Saturday at 12:00 → "0 12 * * 6"
   const dayMap = {
@@ -41,14 +59,17 @@ async function runGeneration() {
     const recentMeals = getRecentMealNames();
     const randomRecipes = getRandomSundayCandidates(6, recentMeals);
 
-    const plan = await generateWeeklyPlan({
-      meals,
-      sides,
-      allergies: settings.allergies || {},
-      ratings,
-      recentMeals,
-      randomRecipes,
-    });
+    const plan = await retryWithBackoff(
+      () => generateWeeklyPlan({
+        meals,
+        sides,
+        allergies: settings.allergies || {},
+        ratings,
+        recentMeals,
+        randomRecipes,
+      }),
+      { label: 'Meal plan generation' }
+    );
 
     savePlan(plan);
     console.log('[Scheduler] Meal plan generated and saved successfully.');
@@ -58,14 +79,17 @@ async function runGeneration() {
     try {
       const choreData = getChoreDefinitions();
       const recentAssignments = getRecentChoreAssignments();
-      chorePlan = await generateWeeklyChores({
-        choreDefinitions: choreData.choreDefinitions || [],
-        familyMembers: choreData.familyMembers || [],
-        preferences: choreData.chorePreferences || {},
-        recentAssignments,
-        notes: choreData.notes || {},
-        choresPerPerson: settings.choresPerPerson || 2,
-      });
+      chorePlan = await retryWithBackoff(
+        () => generateWeeklyChores({
+          choreDefinitions: choreData.choreDefinitions || [],
+          familyMembers: choreData.familyMembers || [],
+          preferences: choreData.chorePreferences || {},
+          recentAssignments,
+          notes: choreData.notes || {},
+          choresPerPerson: settings.choresPerPerson || 2,
+        }),
+        { label: 'Chore plan generation' }
+      );
       saveChorePlan(chorePlan);
       console.log('[Scheduler] Chore plan generated and saved successfully.');
     } catch (err) {
