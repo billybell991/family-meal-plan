@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions, getVapidPublicKey, subscribePush, unsubscribePush, sendTestPush } from '../api.js';
+import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions, getVapidPublicKey, subscribePush, unsubscribePush, sendTestPush, reportBug } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -176,6 +176,17 @@ export default function SettingsPage() {
       await sendTestPush();
     } catch (e) {
       alert(e.response?.data?.error || 'Failed to send test push.');
+    }
+  };
+
+  const handleReportBug = async () => {
+    const text = window.prompt("Found a bug? Describe what happened:");
+    if (!text?.trim()) return;
+    try {
+      await reportBug(text.trim());
+      alert('Bug reported successfully! I will look into it later.');
+    } catch (e) {
+      alert('Error reporting bug: ' + (e.response?.data?.error || e.message));
     }
   };
 
@@ -729,6 +740,13 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+      
+      <div className="pt-8 pb-12 flex justify-center text-xs">
+        <button onClick={handleReportBug} className="text-gray-400 hover:text-gray-600 underline">
+          Report a Bug
+        </button>
+      </div>
+
     </div>
   );
 }

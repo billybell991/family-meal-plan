@@ -18,6 +18,7 @@ const HISTORY_FILE = path.join(DATA_DIR, 'plan-history.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 const RATINGS_FILE = path.join(DATA_DIR, 'ratings.json');
 const MEALS_FILE = path.join(DATA_DIR, 'meals.json');
+const BUGS_FILE = path.join(DATA_DIR, 'bugs.json');
 const CHORES_FILE = path.join(DATA_DIR, 'chores.json');
 const CHORE_PLAN_FILE = path.join(DATA_DIR, 'current-chore-plan.json');
 const CHORE_HISTORY_FILE = path.join(DATA_DIR, 'chore-history.json');
@@ -278,7 +279,22 @@ function getRecentChoreAssignments() {
   return assignments;
 }
 
+function getBugs() {
+  if (fs.existsSync(BUGS_FILE)) {
+    return JSON.parse(fs.readFileSync(BUGS_FILE, 'utf8'));
+  }
+  return [];
+}
+
+function addBug(text) {
+  const bugs = getBugs();
+  bugs.push({ id: Date.now(), text, date: new Date().toISOString(), status: 'open' });
+  fs.writeFileSync(BUGS_FILE, JSON.stringify(bugs, null, 2));
+}
+
 module.exports = {
+  getBugs,
+  addBug,
   getCurrentPlan,
   savePlan,
   updateDayInPlan,

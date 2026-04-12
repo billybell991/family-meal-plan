@@ -65,3 +65,6 @@ export const unsubscribePush = (endpoint) => api.post('/push/unsubscribe', { end
 export const sendTestPush = () => api.post('/push/test');
 
 export const helpWithMeal = (day, who) => api.post(`/meals/help`, { day, who });
+
+export const getBugs = () => api.get('/settings/bugs');
+export const reportBug = (text) => api.post('/settings/bugs', { text });

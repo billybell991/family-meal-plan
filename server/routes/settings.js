@@ -11,6 +11,8 @@ const {
   saveKnownMeals,
   getCurrentPlan,
   getCurrentChorePlan,
+  getBugs,
+  addBug,
 } = require('../services/dataService');
 const { sendWeeklyNotification, sendDailyNotification } = require('../services/notificationService');
 const scheduler = require('../scheduler');
@@ -141,6 +143,29 @@ router.post('/meals', (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// GET /api/settings/bugs
+router.get('/bugs', (req, res) => {
+  try {
+    res.json(getBugs());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/settings/bugs
+router.post('/bugs', (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ error: 'Bug text is required' });
+    }
+    addBug(text);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
