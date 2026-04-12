@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-import { setHighScore, getHighScore } from "../../lib/games";
+import { saveHighScore, getHighScore } from "../../lib/games";
 
 // Canvas & Physics Constants
 const CW = 360;
@@ -268,7 +268,7 @@ export default function BellDash({ onClose }) {
         o.x -= g.speed;
         if (hit(PLAYER_X, g.py, PLAYER_W, PLAYER_H, o.x, GROUND_Y - o.h, o.w, o.h)) {
           g.phase = "dead";
-          setHighScore("bell-dash", g.score);
+          saveHighScore("bell-dash", g.score);
         }
       }
     }

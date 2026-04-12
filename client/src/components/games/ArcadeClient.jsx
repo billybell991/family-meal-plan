@@ -126,7 +126,7 @@ function GameModal({ game, onClose }) {
 
 // Main Client
 export default function ArcadeClient({ stickerCount, adminMode, GAME_REGISTRY, getHighScore, isGameUnlocked }) {
-  const [highScores, setHighScores] = useState({});
+  const [highScores, saveHighScores] = useState({});
   const [activeGame, setActiveGame] = useState(null);
 
   // Hide bottom nav while a game is open
@@ -145,7 +145,7 @@ export default function ArcadeClient({ stickerCount, adminMode, GAME_REGISTRY, g
     for (const game of GAME_REGISTRY) {
       scores[game.id] = getHighScore(game.id);
     }
-    setHighScores(scores);
+    saveHighScores(scores);
   }, [activeGame, GAME_REGISTRY, getHighScore]); // refresh after closing a game
 
   const unlockedGames = GAME_REGISTRY.filter((g) => isGameUnlocked(g, stickerCount, adminMode));
