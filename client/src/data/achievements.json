@@ -1,0 +1,670 @@
+[
+  {
+    "id": "sous-chef-1",
+    "name": "Sous Chef I",
+    "description": "Help with 5 meals.",
+    "category": "Culinary Arts",
+    "tier": "Bronze",
+    "image": "/stickers/sous-chef-1.svg",
+    "criteria": {
+      "type": "meal",
+      "count": 5
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "sous-chef-2",
+    "name": "Sous Chef II",
+    "description": "Help with 15 meals.",
+    "category": "Culinary Arts",
+    "tier": "Silver",
+    "image": "/stickers/sous-chef-2.svg",
+    "criteria": {
+      "type": "meal",
+      "count": 15
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "sous-chef-3",
+    "name": "Sous Chef III",
+    "description": "Help with 30 meals.",
+    "category": "Culinary Arts",
+    "tier": "Gold",
+    "image": "/stickers/sous-chef-3.svg",
+    "criteria": {
+      "type": "meal",
+      "count": 30
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "iron-chef-1",
+    "name": "Iron Chef I",
+    "description": "Achieve a 3-day cooking streak.",
+    "category": "Culinary Arts",
+    "tier": "Bronze",
+    "image": "/stickers/iron-chef-1.svg",
+    "criteria": {
+      "type": "streak",
+      "task": "cook",
+      "days": 3
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "iron-chef-2",
+    "name": "Iron Chef II",
+    "description": "Achieve a 7-day cooking streak.",
+    "category": "Culinary Arts",
+    "tier": "Silver",
+    "image": "/stickers/iron-chef-2.svg",
+    "criteria": {
+      "type": "streak",
+      "task": "cook",
+      "days": 7
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "iron-chef-3",
+    "name": "Iron Chef III",
+    "description": "Achieve a 14-day cooking streak.",
+    "category": "Culinary Arts",
+    "tier": "Gold",
+    "image": "/stickers/iron-chef-3.svg",
+    "criteria": {
+      "type": "streak",
+      "task": "cook",
+      "days": 14
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "dust-bunny-slayer-1",
+    "name": "Dust Bunny Slayer I",
+    "description": "Complete 10 chores.",
+    "category": "Clean Sweep",
+    "tier": "Bronze",
+    "image": "/stickers/dust-bunny-slayer-1.svg",
+    "criteria": {
+      "type": "chore",
+      "count": 10
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "dust-bunny-slayer-2",
+    "name": "Dust Bunny Slayer II",
+    "description": "Complete 25 chores.",
+    "category": "Clean Sweep",
+    "tier": "Silver",
+    "image": "/stickers/dust-bunny-slayer-2.svg",
+    "criteria": {
+      "type": "chore",
+      "count": 25
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "dust-bunny-slayer-3",
+    "name": "Dust Bunny Slayer III",
+    "description": "Complete 50 chores.",
+    "category": "Clean Sweep",
+    "tier": "Gold",
+    "image": "/stickers/dust-bunny-slayer-3.svg",
+    "criteria": {
+      "type": "chore",
+      "count": 50
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "dish-dynasty-1",
+    "name": "Dish Dynasty I",
+    "description": "Do the dishes 5 times.",
+    "category": "Clean Sweep",
+    "tier": "Bronze",
+    "image": "/stickers/dish-dynasty-1.svg",
+    "criteria": {
+      "type": "chore",
+      "name": "dishes",
+      "count": 5
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "vacuum-voyager-1",
+    "name": "Vacuum Voyager I",
+    "description": "Vacuum 5 times.",
+    "category": "Clean Sweep",
+    "tier": "Bronze",
+    "image": "/stickers/vacuum-voyager-1.svg",
+    "criteria": {
+      "type": "chore",
+      "name": "vacuum",
+      "count": 5
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "early-bird",
+    "name": "Early Bird",
+    "description": "Complete a chore before 9 AM.",
+    "category": "Special",
+    "tier": "Bronze",
+    "image": "/stickers/early-bird.svg",
+    "criteria": {
+      "type": "chore",
+      "time": "before_9am"
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "night-owl",
+    "name": "Night Owl",
+    "description": "Complete a chore after 9 PM.",
+    "category": "Special",
+    "tier": "Bronze",
+    "image": "/stickers/night-owl.svg",
+    "criteria": {
+      "type": "chore",
+      "time": "after_9pm"
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "sunday-savior",
+    "name": "Sunday Savior",
+    "description": "Prep for the week on a Sunday.",
+    "category": "Special",
+    "tier": "Bronze",
+    "image": "/stickers/sunday-savior.svg",
+    "criteria": {
+      "type": "prep",
+      "day": "sunday"
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "flavor-profile-1",
+    "name": "Flavor Profile I",
+    "description": "Try 1 new recipe.",
+    "category": "Culinary Arts",
+    "tier": "Bronze",
+    "image": "/stickers/flavor-profile-1.svg",
+    "criteria": {
+      "type": "meal",
+      "newRecipe": true,
+      "count": 1
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "flavor-profile-2",
+    "name": "Flavor Profile II",
+    "description": "Try 5 new recipes.",
+    "category": "Culinary Arts",
+    "tier": "Silver",
+    "image": "/stickers/flavor-profile-2.svg",
+    "criteria": {
+      "type": "meal",
+      "newRecipe": true,
+      "count": 5
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "flavor-profile-3",
+    "name": "Flavor Profile III",
+    "description": "Try 10 new recipes.",
+    "category": "Culinary Arts",
+    "tier": "Gold",
+    "image": "/stickers/flavor-profile-3.svg",
+    "criteria": {
+      "type": "meal",
+      "newRecipe": true,
+      "count": 10
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "chore-streak-1",
+    "name": "Chore Streak I",
+    "description": "Complete all your chores for 3 days in a row.",
+    "category": "Clean Sweep",
+    "tier": "Bronze",
+    "image": "/stickers/chore-streak-1.svg",
+    "criteria": {
+      "type": "streak",
+      "task": "all_chores",
+      "days": 3
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "chore-streak-2",
+    "name": "Chore Streak II",
+    "description": "Complete all your chores for 7 days in a row.",
+    "category": "Clean Sweep",
+    "tier": "Silver",
+    "image": "/stickers/chore-streak-2.svg",
+    "criteria": {
+      "type": "streak",
+      "task": "all_chores",
+      "days": 7
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "chore-streak-3",
+    "name": "Chore Streak III",
+    "description": "Complete all your chores for 14 days in a row.",
+    "category": "Clean Sweep",
+    "tier": "Gold",
+    "image": "/stickers/chore-streak-3.svg",
+    "criteria": {
+      "type": "streak",
+      "task": "all_chores",
+      "days": 14
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "team-player-1",
+    "name": "Team Player I",
+    "description": "Help another family member with their chore.",
+    "category": "Special",
+    "tier": "Bronze",
+    "image": "/stickers/team-player-1.svg",
+    "criteria": {
+      "type": "chore",
+      "help": true,
+      "count": 1
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "team-player-2",
+    "name": "Team Player II",
+    "description": "Help other family members with their chores 5 times.",
+    "category": "Special",
+    "tier": "Silver",
+    "image": "/stickers/team-player-2.svg",
+    "criteria": {
+      "type": "chore",
+      "help": true,
+      "count": 5
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "team-player-3",
+    "name": "Team Player III",
+    "description": "Help other family members with their chores 10 times.",
+    "category": "Special",
+    "tier": "Gold",
+    "image": "/stickers/team-player-3.svg",
+    "criteria": {
+      "type": "chore",
+      "help": true,
+      "count": 10
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "planner-pro",
+    "name": "Planner Pro",
+    "description": "Plan meals for the entire week.",
+    "category": "Special",
+    "tier": "Silver",
+    "image": "/stickers/planner-pro.svg",
+    "criteria": {
+      "type": "plan",
+      "scope": "week"
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "five-star-meal-1",
+    "name": "Five-Star Meal I",
+    "description": "Rate a meal 5 stars.",
+    "category": "Culinary Arts",
+    "tier": "Bronze",
+    "image": "/stickers/five-star-meal-1.svg",
+    "criteria": {
+      "type": "rating",
+      "stars": 5,
+      "count": 1
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "five-star-meal-2",
+    "name": "Five-Star Meal II",
+    "description": "Rate 3 meals 5 stars.",
+    "category": "Culinary Arts",
+    "tier": "Silver",
+    "image": "/stickers/five-star-meal-2.svg",
+    "criteria": {
+      "type": "rating",
+      "stars": 5,
+      "count": 3
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "five-star-meal-3",
+    "name": "Five-Star Meal III",
+    "description": "Rate 5 meals 5 stars.",
+    "category": "Culinary Arts",
+    "tier": "Gold",
+    "image": "/stickers/five-star-meal-3.svg",
+    "criteria": {
+      "type": "rating",
+      "stars": 5,
+      "count": 5
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "variety-voyager-1",
+    "name": "Variety Voyager I",
+    "description": "Eat 3 different meals in a week.",
+    "category": "Culinary Arts",
+    "tier": "Bronze",
+    "image": "/stickers/variety-voyager-1.svg",
+    "criteria": {
+      "type": "variety",
+      "count": 3,
+      "period": "week"
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "variety-voyager-2",
+    "name": "Variety Voyager II",
+    "description": "Eat 5 different meals in a week.",
+    "category": "Culinary Arts",
+    "tier": "Silver",
+    "image": "/stickers/variety-voyager-2.svg",
+    "criteria": {
+      "type": "variety",
+      "count": 5,
+      "period": "week"
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "variety-voyager-3",
+    "name": "Variety Voyager III",
+    "description": "Eat 7 different meals in a week.",
+    "category": "Culinary Arts",
+    "tier": "Gold",
+    "image": "/stickers/variety-voyager-3.svg",
+    "criteria": {
+      "type": "variety",
+      "count": 7,
+      "period": "week"
+    },
+    "icon": "👨‍🍳",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "game-time-champ",
+    "name": "Game Time Champ",
+    "description": "Get first place on any game leaderboard.",
+    "category": "Arcade",
+    "tier": "Gold",
+    "image": "/stickers/game-time-champ.svg",
+    "criteria": {
+      "type": "game",
+      "rank": 1
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "first-game",
+    "name": "First Game",
+    "description": "Play any game in the arcade for the first time.",
+    "category": "Arcade",
+    "tier": "Bronze",
+    "image": "/stickers/first-game.svg",
+    "criteria": {
+      "type": "game",
+      "played": 1
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "high-scorer-1",
+    "name": "High Scorer I",
+    "description": "Score 1,000 points in any game.",
+    "category": "Arcade",
+    "tier": "Bronze",
+    "image": "/stickers/high-scorer-1.svg",
+    "criteria": {
+      "type": "game",
+      "score": 1000
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#CD7F32",
+      "to": "#8B4513",
+      "text": "text-amber-700"
+    }
+  },
+  {
+    "id": "high-scorer-2",
+    "name": "High Scorer II",
+    "description": "Score 5,000 points in any game.",
+    "category": "Arcade",
+    "tier": "Silver",
+    "image": "/stickers/high-scorer-2.svg",
+    "criteria": {
+      "type": "game",
+      "score": 5000
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#C0C0C0",
+      "to": "#696969",
+      "text": "text-slate-500"
+    }
+  },
+  {
+    "id": "high-scorer-3",
+    "name": "High Scorer III",
+    "description": "Score 10,000 points in any game.",
+    "category": "Arcade",
+    "tier": "Gold",
+    "image": "/stickers/high-scorer-3.svg",
+    "criteria": {
+      "type": "game",
+      "score": 10000
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#FFD700",
+      "to": "#DAA520",
+      "text": "text-yellow-600"
+    }
+  },
+  {
+    "id": "completionist",
+    "name": "Completionist",
+    "description": "Unlock all other achievements.",
+    "category": "Special",
+    "tier": "Platinum",
+    "image": "/stickers/completionist.svg",
+    "criteria": {
+      "type": "achievement",
+      "all": true
+    },
+    "icon": "🏆",
+    "colorTheme": {
+      "from": "#E5E4E2",
+      "to": "#778899",
+      "text": "text-slate-300"
+    }
+  }
+]

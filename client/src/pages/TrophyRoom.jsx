@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import achievements from '@data/achievements.json';
-import users from '@data/users.json';
+import achievements from '../data/achievements.json';
+import users from '../data/users.json';
 import ArcadeClient from '../components/games/ArcadeClient';
 
 const GAME_REGISTRY = [
