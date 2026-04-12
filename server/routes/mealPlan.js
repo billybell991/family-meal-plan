@@ -16,6 +16,14 @@ const { generateWeeklyPlan } = require('../services/geminiService');
 const { getRandomSundayCandidates } = require('../services/recipeService');
 const { savePlan } = require('../services/dataService');
 
+// POST /api/meal-plan/help - Log that a user helped with a meal
+router.post('/help', (req, res) => {
+  const { day, who } = req.body;
+  console.log(`${who} helped with the meal on ${day}`);
+  const plan = getCurrentPlan();
+  res.json(plan);
+});
+
 // GET /api/meal-plan — get current week's plan
 router.get('/', (req, res) => {
   const plan = getCurrentPlan();

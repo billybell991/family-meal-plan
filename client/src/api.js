@@ -18,7 +18,7 @@ export const generatePlan = () => api.post('/meal-plan/generate');
 export const updateDay = (day, updates) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}`, updates);
 export const updatePortions = (day, portions) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/portions`, { portions });
 export const toggleTakeout = (day, isTakeout) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/takeout`, { isTakeout });
-export const toggleLeftover = (day, isLeftover) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/leftover`, { isLeftover });
+export const toggleLeftover = (day, isLeftover) => api.post(`/plan/leftover`, { day, isLeftover });
 export const getPlanHistory = () => api.get('/meal-plan/history');
 export const clearHistory = () => api.delete('/meal-plan/history');
 
@@ -63,3 +63,5 @@ export const getVapidPublicKey = () => api.get('/push/vapid-public-key');
 export const subscribePush = (subscription) => api.post('/push/subscribe', subscription);
 export const unsubscribePush = (endpoint) => api.post('/push/unsubscribe', { endpoint });
 export const sendTestPush = () => api.post('/push/test');
+
+export const helpWithMeal = (day, who) => api.post(`/meals/help`, { day, who });

@@ -4,14 +4,14 @@ import WeeklyPlanPage from './pages/WeeklyPlanPage.jsx';
 import ChoresPage from './pages/ChoresPage.jsx';
 import GroceryListPage from './pages/GroceryListPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
-import HistoryPage from './pages/HistoryPage.jsx';
+import TrophyRoom from './pages/TrophyRoom.jsx';
 
 const NAV = [
   { to: '/', icon: '📋', label: 'My Week' },
   { to: '/meals', icon: '🍽️', label: 'Meals' },
   { to: '/chores', icon: '🧹', label: 'Chores' },
   { to: '/grocery', icon: '🛒', label: 'Grocery' },
-  { to: '/history', icon: '📊', label: 'History' },
+  { to: '/trophy-room', icon: '🏆', label: 'Trophies' },
   { to: '/settings', icon: '⚙️', label: 'Settings' },
 ];
 
@@ -48,7 +48,7 @@ export default function App() {
           </nav>
         </div>
         {/* Mobile nav */}
-        <div className="sm:hidden flex border-t border-brand-800">
+        <div className="sm:hidden flex overflow-x-auto border-t border-brand-800 hide-scrollbar">
           {NAV.map(({ to, icon, label }) => (
             <NavLink
               key={to}
@@ -74,7 +74,7 @@ export default function App() {
           <Route path="/meals" element={<WeeklyPlanPage />} />
           <Route path="/chores" element={<ChoresPage />} />
           <Route path="/grocery" element={<GroceryListPage />} />
-          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/trophy-room" element={<TrophyRoom />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>

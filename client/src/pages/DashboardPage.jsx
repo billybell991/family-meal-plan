@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMealPlan, getChorePlan, toggleChoreComplete, toggleTakeout, toggleLeftover } from '../api.js';
+import { checkAchievements } from '../achievements.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -24,6 +25,7 @@ export default function DashboardPage() {
   const [chorePlan, setChorePlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedDay, setExpandedDay] = useState(null);
+  const [newAchievements, setNewAchievements] = useState([]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -44,6 +46,14 @@ export default function DashboardPage() {
     try {
       const res = await toggleChoreComplete(day, choreId, assignedTo, isCompleted);
       setChorePlan(res.data);
+
+      if (isCompleted) {
+        const earned = checkAchievements(assignedTo, 'completed_chore', { choreName: choreId });
+        if (earned.length > 0) {
+          setNewAchievements(earned);
+          setTimeout(() => setNewAchievements([]), 5000); // Clear after 5 seconds
+        }
+      }
     } catch (err) {
       console.error('Toggle complete failed:', err);
     }
@@ -74,6 +84,16 @@ export default function DashboardPage() {
 
   return (
     <div>
+      {newAchievements.length > 0 && (
+        <div className="fixed top-20 right-4 z-50">
+          {newAchievements.map(ach => (
+            <div key={ach.id} className="bg-green-500 text-white p-4 rounded-lg shadow-lg mb-2">
+              <h3 className="font-bold">Sticker Unlocked!</h3>
+              <p>{ach.name}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">My Week</h2>

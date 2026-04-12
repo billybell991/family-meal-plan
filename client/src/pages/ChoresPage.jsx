@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getChorePlan, generateChorePlan, deleteChorePlan, toggleChoreComplete, getChoreDefinitions, addChoreDefinition, updateChoreDefinition, deleteChoreDefinition, updateDayAssignments } from '../api.js';
+import { checkAchievements } from '../achievements.js';
 import ChoreCard from '../components/ChoreCard.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import EditChoreModal from '../components/EditChoreModal.jsx';
@@ -35,6 +36,7 @@ export default function ChoresPage() {
   const [choreModal, setChoreModal] = useState({ open: false, chore: null });
   const [editDayModal, setEditDayModal] = useState(null); // dayData or null
   const [libraryFilter, setLibraryFilter] = useState('all');
+  const [newAchievements, setNewAchievements] = useState([]);
 
   const loadPlan = useCallback(async () => {
     setLoading(true);
@@ -91,6 +93,15 @@ export default function ChoresPage() {
     try {
       const res = await toggleChoreComplete(day, choreId, assignedTo, isCompleted);
       setPlan(res.data);
+
+      if (isCompleted) {
+        const chore = choreLibrary.find(c => c.id === choreId);
+        const earned = checkAchievements(assignedTo, 'completed_chore', { choreName: chore?.name });
+        if (earned.length > 0) {
+          setNewAchievements(earned);
+          setTimeout(() => setNewAchievements([]), 5000); // Clear after 5 seconds
+        }
+      }
     } catch (err) {
       console.error('Toggle complete failed:', err);
     }
@@ -177,6 +188,16 @@ export default function ChoresPage() {
 
   return (
     <div>
+      {newAchievements.length > 0 && (
+        <div className="fixed top-20 right-4 z-50">
+          {newAchievements.map(ach => (
+            <div key={ach.id} className="bg-green-500 text-white p-4 rounded-lg shadow-lg mb-2">
+              <h3 className="font-bold">Sticker Unlocked!</h3>
+              <p>{ach.name}</p>
+            </div>
+          ))}
+        </div>
+      )}
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>

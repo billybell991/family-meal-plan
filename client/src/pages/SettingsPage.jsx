@@ -575,6 +575,24 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Chores per Person */}
+      <div className="card p-6 space-y-3">
+        <h3 className="font-semibold text-gray-800 text-lg">🧹 Chores per Person</h3>
+        <p className="text-sm text-gray-500">How many chores each person should be assigned per day.</p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSettings(s => ({ ...s, choresPerPerson: Math.max(1, (s.choresPerPerson || 2) - 1) }))}
+            className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-lg hover:bg-gray-50"
+          >−</button>
+          <span className="text-xl font-bold text-brand-600">{settings.choresPerPerson || 2}</span>
+          <button
+            onClick={() => setSettings(s => ({ ...s, choresPerPerson: Math.min(10, (s.choresPerPerson || 2) + 1) }))}
+            className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-lg hover:bg-gray-50"
+          >+</button>
+          <span className="text-sm text-gray-500">chores/day</span>
+        </div>
+      </div>
+
       {/* Chore Preferences */}
       <div className="card p-6 space-y-4">
         <h3 className="font-semibold text-gray-800 text-lg">🧹 Chore Preferences</h3>

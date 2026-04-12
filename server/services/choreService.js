@@ -5,7 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 /**
  * Ask Gemini to generate a weekly chore assignment plan for the Bell family.
  */
-async function generateWeeklyChores({ choreDefinitions = [], familyMembers = [], preferences = {}, recentAssignments = [], notes = {} }) {
+async function generateWeeklyChores({ choreDefinitions = [], familyMembers = [], preferences = {}, recentAssignments = [], notes = {}, choresPerPerson = 2 }) {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const choreList = choreDefinitions.map(c => {
@@ -56,7 +56,7 @@ RULES:
 5. Respect ageMin — Maddy is 15, Maya is 20.
 6. Distribute workload fairly. Teens get lighter loads than adults.
 7. Respect preferences when provided.
-8. Each person should have 2-4 chores per day. Weekdays lighter, weekends heavier.
+8. Each person should have around ${choresPerPerson} chores per day. Weekdays lighter, weekends heavier.
 9. Do NOT include every chore every week. Pick a reasonable subset — a typical family doesn't do all 39 chores weekly.
 10. If a chore says "MUST be on: <Day>", it MUST ONLY appear on that specific day. Never schedule it on any other day.
 

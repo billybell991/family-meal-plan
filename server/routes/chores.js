@@ -113,6 +113,7 @@ router.post('/plan/generate', async (req, res) => {
   try {
     const choreData = getChoreDefinitions();
     const recentAssignments = getRecentChoreAssignments();
+    const settings = getSettings();
 
     const plan = await generateWeeklyChores({
       choreDefinitions: choreData.choreDefinitions || [],
@@ -120,6 +121,7 @@ router.post('/plan/generate', async (req, res) => {
       preferences: choreData.chorePreferences || {},
       recentAssignments,
       notes: choreData.notes || {},
+      choresPerPerson: settings.choresPerPerson || 2,
     });
 
     // Sync "Make supper" chore with meal plan cook assignments

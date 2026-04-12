@@ -64,6 +64,7 @@ async function runGeneration() {
         preferences: choreData.chorePreferences || {},
         recentAssignments,
         notes: choreData.notes || {},
+        choresPerPerson: settings.choresPerPerson || 2,
       });
       saveChorePlan(chorePlan);
       console.log('[Scheduler] Chore plan generated and saved successfully.');

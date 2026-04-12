@@ -6,12 +6,13 @@ import RatingStars from './RatingStars.jsx';
 const QUICK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
 const TODAY_DATE = new Date().toISOString().slice(0, 10);
 
-export default function DayCard({ dayData, onToggleTakeout, onUpdate }) {
+export default function DayCard({ dayData, onToggleTakeout, onUpdate, onHelpWithMeal }) {
   const [editOpen, setEditOpen]       = useState(false);
   const [expanded, setExpanded]       = useState(false);
   const [showIngredients, setShowIngredients] = useState(false);
   const [portionsLocal, setPortionsLocal] = useState(dayData.portions ?? 4);
   const [saving, setSaving]           = useState(false);
+  const [helper, setHelper]           = useState('Mom');
 
 
   useEffect(() => { setPortionsLocal(dayData.portions ?? 4); }, [dayData.portions]);

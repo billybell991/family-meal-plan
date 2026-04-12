@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getMealPlan, generatePlan, toggleTakeout, deletePlan } from '../api.js';
+import { getMealPlan, generatePlan, toggleTakeout, deletePlan, helpWithMeal } from '../api.js';
+import { checkAchievements } from '../achievements.js';
 import DayCard from '../components/DayCard.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
@@ -23,6 +24,7 @@ export default function WeeklyPlanPage() {
   const [progressStep, setProgressStep] = useState(0);
   const [error, setError] = useState(null);
   const progressTimer = useRef(null);
+  const [newAchievements, setNewAchievements] = useState([]);
 
   const loadPlan = useCallback(async () => {
     setLoading(true);
@@ -76,6 +78,20 @@ export default function WeeklyPlanPage() {
     }
   };
 
+  const handleHelpWithMeal = async (day, who) => {
+    try {
+      const res = await helpWithMeal(day, who);
+      setPlan(res.data);
+      const earned = checkAchievements(who, 'helped_with_meal', {});
+      if (earned.length > 0) {
+        setNewAchievements(earned);
+        setTimeout(() => setNewAchievements([]), 5000); // Clear after 5 seconds
+      }
+    } catch (err) {
+      console.error('Help with meal failed:', err);
+    }
+  };
+
   const handleDayUpdate = (updatedPlan) => {
     setPlan(updatedPlan);
   };
@@ -111,6 +127,16 @@ export default function WeeklyPlanPage() {
 
   return (
     <div>
+      {newAchievements.length > 0 && (
+        <div className="fixed top-20 right-4 z-50">
+          {newAchievements.map(ach => (
+            <div key={ach.id} className="bg-green-500 text-white p-4 rounded-lg shadow-lg mb-2">
+              <h3 className="font-bold">Sticker Unlocked!</h3>
+              <p>{ach.name}</p>
+            </div>
+          ))}
+        </div>
+      )}
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
@@ -181,101 +207,16 @@ export default function WeeklyPlanPage() {
       })()}
 
       {plan && !generating && (
-        <div className="lg:grid lg:grid-cols-[1fr_272px] lg:gap-8 lg:items-start">
-
-          {/* ── Day cards ── */}
-          <div>
-            {/* Legend — mobile only (desktop has sidebar) */}
-            <div className="flex flex-wrap gap-3 mb-5 text-xs text-gray-500 lg:hidden">
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-brand-400 inline-block"></span>Random Sunday Special</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-blue-400 inline-block"></span>Takeout Night</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-orange-300 inline-block"></span>Leftover Night</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>Quick weeknight meal</span>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              {sortedDays.map((dayData) => (
-                <DayCard
-                  key={dayData.day}
-                  dayData={{
-                    ...dayData,
-                    groceryItems: (plan.groceryItems || []).filter(g => g.forDay === dayData.day),
-                  }}
-                  onToggleTakeout={handleToggleTakeout}
-                  onUpdate={handleDayUpdate}
-                />
-              ))}
-            </div>
-
-            <p className="text-xs text-gray-400 mt-6 text-right lg:hidden">
-              Generated: {new Date(plan.generatedAt).toLocaleString()}
-            </p>
-          </div>
-
-          {/* ── Desktop sidebar ── */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-4">
-
-              {/* Week at a Glance */}
-              <div className="card p-5">
-                <h3 className="font-semibold text-sm text-slate-700 mb-4">Week at a Glance</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">🍳 Home-cooked</span>
-                    <span className="font-bold text-slate-800">{homeCookedCount} nights</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">🥡 Takeout</span>
-                    <span className="font-bold text-slate-800">{takeoutCount} nights</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">♻️ Leftovers</span>
-                    <span className="font-bold text-slate-800">{leftoverCount} nights</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">⚡ Quick meals</span>
-                    <span className="font-bold text-slate-800">{quickCount} nights</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cooking Duties */}
-              {Object.keys(cookMap).length > 0 && (
-                <div className="card p-5">
-                  <h3 className="font-semibold text-sm text-slate-700 mb-4">👨‍🍳 Cooking Duties</h3>
-                  <div className="space-y-2.5">
-                    {Object.entries(cookMap).sort((a, b) => b[1] - a[1]).map(([name, count]) => (
-                      <div key={name} className="flex items-center gap-2">
-                        <span className="text-sm text-slate-600 w-12">{name}</span>
-                        <div className="flex-1 bg-slate-100 rounded-full h-2">
-                          <div
-                            className="bg-brand-400 h-2 rounded-full transition-all"
-                            style={{ width: `${(count / homeCookedCount) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-medium text-slate-500 w-5 text-right">{count}×</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Legend */}
-              <div className="card p-5">
-                <h3 className="font-semibold text-sm text-slate-700 mb-3">Legend</h3>
-                <div className="space-y-2 text-xs text-gray-500">
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-brand-400 flex-shrink-0"></span>Random Sunday Special</span>
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-400 flex-shrink-0"></span>Takeout Night</span>
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-orange-300 flex-shrink-0"></span>Leftover Night</span>
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-400 flex-shrink-0"></span>Quick weeknight meal</span>
-                </div>
-              </div>
-
-              <p className="text-xs text-gray-400 text-center">
-                Generated: {new Date(plan.generatedAt).toLocaleString()}
-              </p>
-            </div>
-          </aside>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sortedDays.map(dayData => (
+            <DayCard
+              key={dayData.day}
+              dayData={dayData}
+              onToggleTakeout={handleToggleTakeout}
+              onUpdate={handleDayUpdate}
+              onHelpWithMeal={handleHelpWithMeal}
+            />
+          ))}
         </div>
       )}
     </div>
