@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions, getVapidPublicKey, subscribePush, unsubscribePush, sendTestPush, reportBug } from '../api.js';
+import { getSettings, saveSettings, addMeal, getKnownMeals, sendNotificationEmail, sendDailyNotificationEmail, getChoreDefinitions, saveChoreDefinitions, getVapidPublicKey, subscribePush, unsubscribePush, sendTestPush, reportBug, resetAllStickers } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -741,6 +741,25 @@ export default function SettingsPage() {
         </div>
       </div>
       
+      <div className="mt-10 bg-red-50 border border-red-200 rounded-xl p-5">
+        <h3 className="text-sm font-bold text-red-700 mb-1">☢️ Danger Zone</h3>
+        <p className="text-xs text-red-500 mb-3">These actions cannot be undone.</p>
+        <button
+          onClick={async () => {
+            if (!window.confirm('☢️ NUCLEAR OPTION: This will erase ALL stickers for ALL family members. Are you sure?')) return;
+            try {
+              await resetAllStickers();
+              alert('All stickers have been reset.');
+            } catch (err) {
+              alert('Failed to reset stickers: ' + (err.response?.data?.error || err.message));
+            }
+          }}
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-red-100 border border-red-300 text-red-700 hover:bg-red-200 transition-colors"
+        >
+          Reset All Stickers
+        </button>
+      </div>
+
       <div className="pt-8 pb-12 flex justify-center text-xs">
         <button onClick={handleReportBug} className="text-gray-400 hover:text-gray-600 underline">
           Report a Bug
