@@ -234,6 +234,8 @@ export default function BellDash({ onClose }) {
     }
   }, [init]);
 
+  const rafId = useRef(null);
+
   const gameLoop = useCallback((ctx) => {
     const g = gs.current;
     g.frame++;
@@ -279,7 +281,49 @@ export default function BellDash({ onClose }) {
     drawBello(ctx, g.py, g.frame);
 
     for (const o of g.obs) {
-        // Draw obstacle based on type 't'
+      const ox = s2(o.x);
+      const oy = s2(GROUND_Y - o.h);
+      if (o.t === 0) {
+        // Donut
+        ctx.fillStyle = C.donut;
+        ctx.beginPath();
+        ctx.arc(ox + 15, oy + 15, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = C.donutL;
+        ctx.beginPath();
+        ctx.arc(ox + 15, oy + 12, 10, Math.PI, 0, false);
+        ctx.fill();
+        ctx.fillStyle = C.donutHole;
+        ctx.beginPath();
+        ctx.arc(ox + 15, oy + 15, 5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (o.t === 1) {
+        // Soda can
+        ctx.fillStyle = C.can;
+        ctx.fillRect(ox + 6, oy + 6, 18, 34);
+        ctx.fillStyle = C.canL;
+        ctx.fillRect(ox + 8, oy + 8, 6, 30);
+        ctx.fillStyle = C.canD;
+        ctx.fillRect(ox + 18, oy + 8, 4, 30);
+        ctx.fillStyle = C.canCap;
+        ctx.fillRect(ox + 8, oy, 14, 8);
+        ctx.fillStyle = "#e0e0e0";
+        ctx.fillRect(ox + 12, oy - 2, 6, 4);
+      } else {
+        // Cookie
+        ctx.fillStyle = C.cookie;
+        ctx.beginPath();
+        ctx.arc(ox + 15, oy + 10, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = C.cookieL;
+        ctx.beginPath();
+        ctx.arc(ox + 13, oy + 7, 8, Math.PI, 0, false);
+        ctx.fill();
+        ctx.fillStyle = C.cookieD;
+        ctx.fillRect(ox + 9, oy + 6, 3, 3);
+        ctx.fillRect(ox + 16, oy + 10, 3, 3);
+        ctx.fillRect(ox + 11, oy + 13, 3, 3);
+      }
     }
 
     // HUD
@@ -312,7 +356,7 @@ export default function BellDash({ onClose }) {
       ctx.fillText("Tap to play again", CW / 2, CH / 2 + 40);
     }
 
-    requestAnimationFrame(() => gameLoop(ctx));
+    rafId.current = requestAnimationFrame(() => gameLoop(ctx));
   }, []);
 
   useEffect(() => {
@@ -333,8 +377,9 @@ export default function BellDash({ onClose }) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       canvas.removeEventListener("touchstart", handleTouchStart);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
   }, [init, gameLoop, jump]);
 
-  return <canvas ref={canvasRef} width={CW} height={CH} className="w-full h-full" />;
+  return <canvas ref={canvasRef} width={CW} height={CH} className="w-full" style={{ aspectRatio: `${CW}/${CH}` }} />;
 }
