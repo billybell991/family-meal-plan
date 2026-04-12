@@ -1,5 +1,5 @@
-import achievements from '../../data/achievements.json';
-import users from '../../data/users.json';
+import achievements from './data/achievements.json';
+import users from './data/users.json';
 
 // In-memory store for user stats to simulate history
 const userStats = users.reduce((acc, user) => {
