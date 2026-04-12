@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import achievements from '../data/achievements.json';
 import users from '../data/users.json';
 import ArcadeClient from '../components/games/ArcadeClient';
+import { resetAllStickers } from '../api.js';
 
 const GAME_REGISTRY = [
   {
@@ -123,11 +124,26 @@ function getHighScore(gameId) {
 const TrophyRoom = () => {
   const [selectedUser, setSelectedUser] = useState(users[0].name);
   const [view, setView] = useState('stickers'); // 'stickers' or 'arcade'
+  const [usersData, setUsersData] = useState(users);
 
-  const user = users.find(u => u.name === selectedUser);
+  const user = usersData.find(u => u.name === selectedUser);
   const earnedStickers = user ? user.stickers : [];
   const stickerCount = earnedStickers.length;
   const adminMode = user ? user.isAdmin : false;
+
+  const handleResetStickers = async () => {
+    if (!window.confirm('☢️ NUCLEAR OPTION: This will erase ALL stickers for ALL family members. Are you sure?')) return;
+    try {
+      const res = await resetAllStickers();
+      // Update local state so UI reflects the reset immediately
+      const resetUsers = usersData.map(u => ({ ...u, stickers: [] }));
+      setUsersData(resetUsers);
+      // Also update the imported module's data in-memory
+      for (const u of users) u.stickers = [];
+    } catch (err) {
+      alert('Failed to reset stickers: ' + (err.message || 'Unknown error'));
+    }
+  };
 
   return (
     <div className="p-4 max-w-5xl mx-auto">
@@ -159,6 +175,13 @@ const TrophyRoom = () => {
               <option key={u.name} value={u.name}>{u.name}'s Showcase</option>
             ))}
           </select>
+          <button
+            onClick={handleResetStickers}
+            className="px-3 py-2 text-xs font-medium rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors"
+            title="Reset all stickers for all users"
+          >
+            ☢️ Reset All Stickers
+          </button>
         </div>
       </div>
 

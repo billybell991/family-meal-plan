@@ -15,6 +15,7 @@ const {
 const { generateWeeklyPlan } = require('../services/geminiService');
 const { getRandomSundayCandidates } = require('../services/recipeService');
 const { savePlan } = require('../services/dataService');
+const { retryWithBackoff } = require('../services/retryWithBackoff');
 
 // POST /api/meal-plan/help - Log that a user helped with a meal
 router.post('/help', (req, res) => {
@@ -77,16 +78,19 @@ router.post('/generate', async (req, res) => {
     const recentMeals = getRecentMealNames();
     const randomRecipes = getRandomSundayCandidates(6, recentMeals);
 
-    const plan = await generateWeeklyPlan({
-      meals,
-      sides,
-      allergies: settings.allergies || {},
-      ratings,
-      recentMeals,
-      randomRecipes,
-      takeoutDay: settings.takeoutDay || 'Wednesday',
-      leftoverDay: settings.leftoverDay || null,
-    });
+    const plan = await retryWithBackoff(
+      () => generateWeeklyPlan({
+        meals,
+        sides,
+        allergies: settings.allergies || {},
+        ratings,
+        recentMeals,
+        randomRecipes,
+        takeoutDay: settings.takeoutDay || 'Wednesday',
+        leftoverDay: settings.leftoverDay || null,
+      }),
+      { label: 'Meal plan generation (manual)' }
+    );
 
     savePlan(plan);
     res.json(plan);

@@ -68,3 +68,5 @@ export const helpWithMeal = (day, who) => api.post(`/meals/help`, { day, who });
 
 export const getBugs = () => api.get('/settings/bugs');
 export const reportBug = (text) => api.post('/settings/bugs', { text });
+
+export const resetAllStickers = () => api.post('/settings/reset-stickers');

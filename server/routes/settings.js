@@ -13,6 +13,7 @@ const {
   getCurrentChorePlan,
   getBugs,
   addBug,
+  resetStickers,
 } = require('../services/dataService');
 const { sendWeeklyNotification, sendDailyNotification } = require('../services/notificationService');
 const scheduler = require('../scheduler');
@@ -164,6 +165,16 @@ router.post('/bugs', (req, res) => {
     }
     addBug(text);
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/settings/reset-stickers — nuclear reset of all stickers for all users
+router.post('/reset-stickers', (req, res) => {
+  try {
+    const users = resetStickers();
+    res.json({ success: true, users });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -22,6 +22,7 @@ const BUGS_FILE = path.join(DATA_DIR, 'bugs.json');
 const CHORES_FILE = path.join(DATA_DIR, 'chores.json');
 const CHORE_PLAN_FILE = path.join(DATA_DIR, 'current-chore-plan.json');
 const CHORE_HISTORY_FILE = path.join(DATA_DIR, 'chore-history.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -292,7 +293,23 @@ function addBug(text) {
   fs.writeFileSync(BUGS_FILE, JSON.stringify(bugs, null, 2));
 }
 
+// ── Users / Stickers ──────────────────────────────────────────────────────────
+function getUsers() {
+  return readJSON(USERS_FILE, []);
+}
+
+function resetStickers() {
+  const users = getUsers();
+  for (const user of users) {
+    user.stickers = [];
+  }
+  writeJSON(USERS_FILE, users);
+  return users;
+}
+
 module.exports = {
+  getUsers,
+  resetStickers,
   getBugs,
   addBug,
   getCurrentPlan,

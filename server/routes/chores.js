@@ -14,6 +14,7 @@ const {
 } = require('../services/dataService');
 const { generateWeeklyChores } = require('../services/choreService');
 const { sendWeeklyNotification } = require('../services/notificationService');
+const { retryWithBackoff } = require('../services/retryWithBackoff');
 
 // GET /api/chores/definitions — get chore library & preferences
 router.get('/definitions', (req, res) => {
@@ -115,14 +116,17 @@ router.post('/plan/generate', async (req, res) => {
     const recentAssignments = getRecentChoreAssignments();
     const settings = getSettings();
 
-    const plan = await generateWeeklyChores({
-      choreDefinitions: choreData.choreDefinitions || [],
-      familyMembers: choreData.familyMembers || [],
-      preferences: choreData.chorePreferences || {},
-      recentAssignments,
-      notes: choreData.notes || {},
-      choresPerPerson: settings.choresPerPerson || 2,
-    });
+    const plan = await retryWithBackoff(
+      () => generateWeeklyChores({
+        choreDefinitions: choreData.choreDefinitions || [],
+        familyMembers: choreData.familyMembers || [],
+        preferences: choreData.chorePreferences || {},
+        recentAssignments,
+        notes: choreData.notes || {},
+        choresPerPerson: settings.choresPerPerson || 2,
+      }),
+      { label: 'Chore plan generation (manual)' }
+    );
 
     // Sync "Make supper" chore with meal plan cook assignments
     // Remove it entirely on takeout or leftover nights
