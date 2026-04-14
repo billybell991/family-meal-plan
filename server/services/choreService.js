@@ -49,14 +49,14 @@ ${recentSection}
 ${notesSection ? `HOUSEHOLD NOTES:\n${notesSection}` : ''}
 
 RULES:
-1. "daily" chores: assign 2-3 daily chores per day, rotating assignees. "Make supper" only needs one person per day. Do NOT assign "Make supper" on takeout or leftover nights.
+1. "daily" chores: rotate assignees. "Make supper" only needs one person per day. Do NOT assign "Make supper" on takeout or leftover nights.
 2. "weekly" chores: assign once during the week.
 3. "biweekly" chores: include some this week.
 4. "monthly" chores: include 1 if it seems due.
 5. Respect ageMin — Maddy is 15, Maya is 20.
 6. Distribute workload fairly. Teens get lighter loads than adults.
 7. Respect preferences when provided.
-8. Each person should have around ${choresPerPerson} chores per day. Weekdays lighter, weekends heavier.
+8. STRICT LIMIT: Each person gets EXACTLY ${choresPerPerson} chores per day. Do NOT exceed this number. Never assign more than ${choresPerPerson} chores to any single person on any day.
 9. Do NOT include every chore every week. Pick a reasonable subset — a typical family doesn't do all 39 chores weekly.
 10. If a chore says "MUST be on: <Day>", it MUST ONLY appear on that specific day. Never schedule it on any other day.
 
