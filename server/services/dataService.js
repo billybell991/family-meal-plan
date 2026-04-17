@@ -150,6 +150,7 @@ const DEFAULT_SETTINGS = {
   dailyEmailMinute: 0,
   notificationEmails: [],
   memberEmails: { Mom: '', Dad: '', Maya: '', Maddy: '' },
+  choresPerPerson: 2,
 };
 
 function getSettings() {

@@ -18,7 +18,7 @@ export const generatePlan = () => api.post('/meal-plan/generate');
 export const updateDay = (day, updates) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}`, updates);
 export const updatePortions = (day, portions) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/portions`, { portions });
 export const toggleTakeout = (day, isTakeout) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/takeout`, { isTakeout });
-export const toggleLeftover = (day, isLeftover) => api.post(`/plan/leftover`, { day, isLeftover });
+export const toggleLeftover = (day, isLeftover) => api.patch(`/meal-plan/day/${encodeURIComponent(day)}/leftover`, { isLeftover });
 export const getPlanHistory = () => api.get('/meal-plan/history');
 export const clearHistory = () => api.delete('/meal-plan/history');
 

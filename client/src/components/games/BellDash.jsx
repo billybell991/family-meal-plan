@@ -198,6 +198,7 @@ function drawBello(ctx, py, frame) {
 // Game Component
 export default function BellDash({ onClose }) {
   const canvasRef = useRef(null);
+  const wrapRef = useRef(null);
   const gs = useRef(null);
   const highScore = useRef(0);
 
@@ -235,6 +236,7 @@ export default function BellDash({ onClose }) {
   }, [init]);
 
   const rafId = useRef(null);
+  const gameLoopRef = useRef(null);
 
   const gameLoop = useCallback((ctx) => {
     const g = gs.current;
@@ -356,11 +358,16 @@ export default function BellDash({ onClose }) {
       ctx.fillText("Tap to play again", CW / 2, CH / 2 + 40);
     }
 
-    rafId.current = requestAnimationFrame(() => gameLoop(ctx));
+    rafId.current = requestAnimationFrame(() => gameLoopRef.current(ctx));
   }, []);
 
   useEffect(() => {
+    gameLoopRef.current = gameLoop;
+  }, [gameLoop]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
+    const wrap = wrapRef.current;
     const ctx = canvas.getContext("2d");
     init();
     gameLoop(ctx);
@@ -370,16 +377,26 @@ export default function BellDash({ onClose }) {
         jump();
       }
     };
-    const handleTouchStart = () => jump();
+    const handleTouchStart = (e) => { e.preventDefault(); jump(); };
 
     window.addEventListener("keydown", handleKeyDown);
-    canvas.addEventListener("touchstart", handleTouchStart);
+    wrap.addEventListener("touchstart", handleTouchStart, { passive: false });
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      canvas.removeEventListener("touchstart", handleTouchStart);
+      wrap.removeEventListener("touchstart", handleTouchStart);
       if (rafId.current) cancelAnimationFrame(rafId.current);
     };
   }, [init, gameLoop, jump]);
 
-  return <canvas ref={canvasRef} width={CW} height={CH} className="w-full" style={{ aspectRatio: `${CW}/${CH}` }} />;
+  return (
+    <div ref={wrapRef} className="flex items-center justify-center w-full h-full" style={{ touchAction: "none" }}>
+      <canvas
+        ref={canvasRef}
+        width={CW}
+        height={CH}
+        className="rounded-2xl border-2 border-white/20 shadow-2xl max-w-full"
+        style={{ imageRendering: "pixelated", touchAction: "none", aspectRatio: `${CW}/${CH}` }}
+      />
+    </div>
+  );
 }
